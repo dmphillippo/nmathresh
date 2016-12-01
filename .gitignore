@@ -1,6 +1,6 @@
 inst/doc
 data-raw/
-data/
 .Rhistory
-.Rproj.user/
 Thumbs.db
+.Rproj.user
+*.Rproj

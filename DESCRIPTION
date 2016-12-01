@@ -1,0 +1,24 @@
+Package: nmathresh
+Type: Package
+Title: Thresholds and invariant intervals for Network Meta-Analysis
+Version: 0.0.1
+Authors@R: person("David", "Phillippo", email="david.phillippo@bristol.ac.uk", role=c("aut","cre"))
+Description: This package provides functions to calculate decision-invariant
+    bias-adjustment thresholds and intervals for a Bayesian Network Meta-Analysis,
+    as described in Phillippo et al. (2016).
+License: GPL-3
+LazyData: TRUE
+Imports:
+    nnls,
+    grid,
+    gridExtra,
+    gtable,
+    Matrix
+Depends: R (>= 3.0.1)
+RoxygenNote: 5.0.1
+Suggests: 
+    knitr,
+    rmarkdown,
+    coda,
+    ggplot2
+VignetteBuilder: knitr
