@@ -43,7 +43,10 @@
 #'   be cut off and marked as NT (no threshold). Not set by default.
 #' @param II.colw Colour for "wide" invariant intervals.
 #' @param II.cols Colour for "short" invariant intervals.
+#' @param II.lwd Line width of invariant intervals. Default 8.
 #' @param CI.lwd Line width of confidence/credible intervals. Default 1.
+#' @param pointsize Point size for forest plot means. Default 4.
+#' @param fontsize Base font size. Default 12.
 #' @param xbreaks Position of tick marks on the x-axis as a numeric vector, or a
 #'   function to calculate these. Passed directly to
 #'   \code{\link[ggplot2]{scale_x_continuous}} arguments \code{breaks} and
@@ -119,7 +122,9 @@ thresh_forest <- function(thresh,
                          refline = NULL, clinsig = NULL, cutoff = NULL,
                          II.colw = rgb(.72, .80, .93),
                          II.cols = rgb(.93, .72, .80),
-                         CI.lwd = 1, xbreaks = NULL, calcdim = TRUE){
+                         II.lwd = 8, CI.lwd = 1,
+                         pointsize = 4, fontsize = 12,
+                         xbreaks = NULL, calcdim = TRUE){
 
   # Evaluate data arguments
   y <- eval(substitute(y), data, parent.frame())
@@ -229,6 +234,7 @@ thresh_forest <- function(thresh,
     rows = NULL,
     cols = c("", label.title, y.title, CI.title, "", "Invariant Interval", ""),
     theme = gridExtra::ttheme_minimal(
+      base_size = fontsize,
       core = list(fg_params = list(
         hjust = rep(c(0, 0,.5, .5, 1,.5, 1), each = Nrows),
         x = rep(c(.6, 0,.5, .5, .5, .5, .5), each = Nrows),
@@ -261,7 +267,7 @@ thresh_forest <- function(thresh,
   for (i in 1:Nrows) {
     # Create forset plot row as grob
     g_for <- with(pd[i, ], forestgrob(y, CI.lo, CI.hi, II.lo, II.hi,
-                                      xlim, CI.lwd, II.cols, II.colw)
+                                      xlim, CI.lwd, II.cols, II.colw, II.lwd, pointsize)
                   )
 
     # Add forest plot row into table
@@ -278,29 +284,31 @@ thresh_forest <- function(thresh,
 
   # Add x-xaxis
   g_all <- gtable_add_rows(g_all, heights = unit(2, "lines"))
-  g_all <- gtable_add_grob(g_all, gTree(children = gList(xaxisGrob(x2c(xbreaks, xlim), label = xbreaks)),
+  g_all <- gtable_add_grob(g_all, gTree(children = gList(xaxisGrob(x2c(xbreaks, xlim),
+                                                                   label = xbreaks,
+                                                                   gp = gpar(fontsize = fontsize - 1))),
                                         vp = viewport(y = 1, just = "bottom", height = unit(2, "lines"))
                                         ),
                            t = Nrows+2, b = Nrows+2, l = Ntabcols+1, r = Ntabcols+1, z = 102, clip = "off")
 
   # Add x-xaxis label
   g_all <- gtable_add_rows(g_all, heights = unit(2, "lines"))
-  g_all <- gtable_add_grob(g_all, textGrob(xlab, vjust = 1),
+  g_all <- gtable_add_grob(g_all, textGrob(xlab, vjust = 1, gp = gpar(fontsize = fontsize - 1)),
                            t = Nrows+3, b = Nrows+3, l = Ntabcols+1, r = Ntabcols+1, z = 101)
 
   # Add legend manually (constructed as an inset table)
   leg <- tableGrob(matrix(c("   ", paste0(y.title, "   "),
                             "   ", paste0(CI.title, "   "),
                             "   ", "Invariant Interval"), nrow = 1),
-                   rows = NULL, cols = NULL, theme = ttheme_minimal(base_size = 11))
+                   rows = NULL, cols = NULL, theme = ttheme_minimal(base_size = fontsize - 1))
 
-  leg <- gtable_add_grob(leg, pointsGrob(x = .5, y = .5, pch = 21, size = unit(3, "mm")),
+  leg <- gtable_add_grob(leg, circleGrob(x = .5, y = .5, r = unit(pointsize, "pt")),
                          t = 1, l = 1, z = -Inf)
   leg <- gtable_add_grob(leg, linesGrob(x = c(0, 1), y = c(.5, .5),
                                         gp = gpar(lwd = CI.lwd)),
                          t = 1, l = 3, z = -Inf)
   leg <- gtable_add_grob(leg, linesGrob(x = c(0, 1), y = c(.5, .5),
-                                        gp = gpar(lwd = 3.5/25.4*72, col = II.colw)),
+                                        gp = gpar(lwd = unit(II.lwd, "pt"), col = II.colw)),
                          t = 1, l = 5, z = -Inf)
 
   g_all <- gtable_add_grob(g_all, leg, t = Nrows+3, b = Nrows+3, l = 2, r = Ntabcols, z = 98)
@@ -338,7 +346,7 @@ x2c <- function(x, xlim){
 # Function to create grid grob of mean, CI, and threshold interval
 forestgrob <- function(y,
                        CI.lo, CI.hi, II.lo, II.hi,
-                       xlim, CI.lwd, II.cols, II.colw){
+                       xlim, CI.lwd, II.cols, II.colw, II.lwd, pointsize){
 
   # Truncate CIs, IIs if necessary
   tCI.lo <- max(CI.lo, xlim[1])
@@ -353,20 +361,23 @@ forestgrob <- function(y,
   tII.hi <- min(II.hi, xlim[2])
   istII.hi <- II.hi > xlim[2]
 
+  # Half invariant interval line width for drawing
+  hlwd <- II.lwd / 2
+
   # Construct grob
   grobTree(
     # Invariant interval, lower
     {if (istII.lo) {
       polygonGrob(x = unit(x2c(c(y, tII.lo, tII.lo, tII.lo, y), xlim),
                            units = "npc") +
-                    unit(c(0, 4,0, 4,0), units = "pt"),
+                    unit(c(0, hlwd, 0, hlwd, 0), units = "pt"),
                   y = unit(rep(0.5, 5), units = "npc") +
-                    unit(c(4, 4,0, -4, -4), units = "pt"),
+                    unit(c(hlwd, hlwd, 0, -hlwd, -hlwd), units = "pt"),
                   gp = gpar(lwd = NA, fill = ifelse(II.lo >= CI.lo, II.cols, II.colw)))
     } else {
       polygonGrob(x = x2c(c(y, tII.lo, tII.lo, y), xlim),
                   y = unit(rep(0.5, 4), units = "npc") +
-                    unit(c(4, 4, -4, -4), units = "pt"),
+                    unit(c(hlwd, hlwd, -hlwd, -hlwd), units = "pt"),
                   gp = gpar(lwd = NA, fill = ifelse(II.lo >= CI.lo, II.cols, II.colw)))
     }},
 
@@ -374,14 +385,14 @@ forestgrob <- function(y,
     {if (istII.hi) {
       polygonGrob(x = unit(x2c(c(y, tII.hi, tII.hi, tII.hi, y), xlim),
                            units = "npc") +
-                    unit(c(0, -4, 0, -4, 0), units = "pt"),
+                    unit(c(0, -hlwd, 0, -hlwd, 0), units = "pt"),
                   y = unit(rep(0.5, 5), units = "npc") +
-                    unit(c(4, 4, 0, -4, -4), units = "pt"),
+                    unit(c(hlwd, hlwd, 0, -hlwd, -hlwd), units = "pt"),
                   gp = gpar(lwd = NA, fill = ifelse(II.hi <= CI.hi, II.cols, II.colw)))
     } else {
       polygonGrob(x = x2c(c(y, tII.hi, tII.hi, y), xlim),
                   y = unit(rep(0.5, 4), units = "npc") +
-                    unit(c(4, 4, -4, -4), units = "pt"),
+                    unit(c(hlwd, hlwd, -hlwd, -hlwd), units = "pt"),
                   gp = gpar(lwd = NA, fill = ifelse(II.hi <= CI.hi, II.cols, II.colw)))
     }},
 
@@ -401,7 +412,7 @@ forestgrob <- function(y,
               gp = gpar(lwd = CI.lwd, fill = "black")),
 
     # Mean
-    circleGrob(x = x2c(y, xlim), y = .5, r = unit(4, "pt"),
+    circleGrob(x = x2c(y, xlim), y = .5, r = unit(pointsize, "pt"),
                gp = gpar(col = "black", fill = "white")),
     vp = viewport(clip = "off")
   )

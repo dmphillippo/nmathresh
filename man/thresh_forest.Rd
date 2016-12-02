@@ -8,8 +8,8 @@ thresh_forest(thresh, y, CI.lo, CI.hi, label, orderby = NULL, data = NULL,
   CI.title = "95\% Confidence Interval", label.title = "",
   y.title = "Mean", xlab = "", xlim = NULL, sigfig = 3, digits = NULL,
   refline = NULL, clinsig = NULL, cutoff = NULL, II.colw = rgb(0.72,
-  0.8, 0.93), II.cols = rgb(0.93, 0.72, 0.8), CI.lwd = 1, xbreaks = NULL,
-  calcdim = TRUE)
+  0.8, 0.93), II.cols = rgb(0.93, 0.72, 0.8), II.lwd = 8, CI.lwd = 1,
+  pointsize = 4, fontsize = 12, xbreaks = NULL, calcdim = TRUE)
 }
 \arguments{
 \item{thresh}{A \code{thresh} object, as produced by
@@ -70,7 +70,13 @@ be cut off and marked as NT (no threshold). Not set by default.}
 
 \item{II.cols}{Colour for "short" invariant intervals.}
 
+\item{II.lwd}{Line width of invariant intervals. Default 8.}
+
 \item{CI.lwd}{Line width of confidence/credible intervals. Default 1.}
+
+\item{pointsize}{Point size for forest plot means. Default 4.}
+
+\item{fontsize}{Base font size. Default 12.}
 
 \item{xbreaks}{Position of tick marks on the x-axis as a numeric vector, or a
 function to calculate these. Passed directly to
