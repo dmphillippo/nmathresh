@@ -131,7 +131,7 @@ nma_thresh <- function(mean.dk, lhood, post,
 
   # Get number of treatments
   K <- length(mean.dk) + 1
-  message("Number of treatments is K = ", K, ".\n", sep="")
+  message("Number of treatments is K = ", K, ".\n")
 
   # Check X matrix for FE model
   if (isFE) {
@@ -145,10 +145,10 @@ nma_thresh <- function(mean.dk, lhood, post,
   if (isFE || is.null(mu.design)) {
     m <- 0
   } else if (nrow(mu.design) != N) {
-    stop("Number of rows in mu.design does not equal N.")
+    stop("Number of rows in mu.design does not equal N.\n")
   } else {
     m <- ifelse(is.null(mu.design),0,ncol(mu.design))
-    message("Number of extra parameters in m.design is m = ",m,".\n",sep="")
+    message("Number of extra parameters in m.design is m = ",m,".\n")
   }
 
   # Get number of delta parameters
@@ -158,7 +158,7 @@ nma_thresh <- function(mean.dk, lhood, post,
     stop("Number of rows in delta.design does not equal N.")
   } else {
     n.delta <- ncol(delta.design)
-    message("Number of delta parameters is n.delta = ",n.delta,".\n",sep="")
+    message("Number of delta parameters is n.delta = ",n.delta,".\n")
   }
 
 
@@ -172,16 +172,16 @@ nma_thresh <- function(mean.dk, lhood, post,
 
   # Treatment rank
   if (length(trt.rank) > 1 | trt.rank != round(trt.rank)) {
-    stop("trt.rank should be a single integer")
+    stop("trt.rank should be a single integer.\n")
   } else if (trt.rank < 1 | trt.rank > K) {
-    stop("trt.rank should be between 1 and K (number of trts)")
+    stop("trt.rank should be between 1 and K (number of trts).\n")
   }
 
   # Note about recoded treatments
   if (is.null(trt.code)) {
     trt.code <- 1:K
   }
-  else if(length(trt.code) != K) stop("trt.code should be of length K.")
+  else if(length(trt.code) != K) stop("trt.code should be of length K.\n")
   else {
     message("Using recoded treatments. Reference treatment is ", trt.code[1],
         ". Parameter vector is:\n",
@@ -195,7 +195,7 @@ nma_thresh <- function(mean.dk, lhood, post,
   } else if(length(trt.sub)>K) stop("Length of trt.sub should be <= K.")
   else {
     message("Deriving thresholds on a subset of treatments:\n",
-            "\t", trt.sub, "\n"
+            "\t", paste(trt.sub, collapse=", "), "\n"
             )
   }
 
@@ -203,7 +203,7 @@ nma_thresh <- function(mean.dk, lhood, post,
 
   # Error if trt.rank > length(trt.sub)
   if(trt.rank > length(trt.sub)) {
-    stop("trt.rank is larger than the length of trt.sub")
+    stop("trt.rank is larger than the length of trt.sub\n")
   }
 
 
