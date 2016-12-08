@@ -47,10 +47,7 @@
 #' @param CI.lwd Line width of confidence/credible intervals. Default 1.
 #' @param pointsize Point size for forest plot means. Default 4.
 #' @param fontsize Base font size. Default 12.
-#' @param xbreaks Position of tick marks on the x-axis as a numeric vector, or a
-#'   function to calculate these. Passed directly to
-#'   \code{\link[ggplot2]{scale_x_continuous}} arguments \code{breaks} and
-#'   \code{labels}.
+#' @param xbreaks Position of tick marks on the x-axis as a numeric vector.
 #' @param calcdim Logical, calculate suggested output dimensions for saving to
 #'   pdf? Calculates output size when \code{TRUE}; saves time when \code{FALSE}.
 #'
