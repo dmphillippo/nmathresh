@@ -322,9 +322,9 @@ thresh_forest <- function(thresh,
 
   # Print sizes for easy saving
   if (calcdim) {
-    message("Suggested output dimensions (inches)\n", sep = "")
-    message("   width: ", convertWidth(sum(g_all$widths), "in", valueOnly = TRUE)*2, "\n", sep = "")
-    message("   height: ", convertHeight(sum(g_all$heights), "in", valueOnly = TRUE), "\n", sep = "")
+    message("Suggested output dimensions (inches)")
+    message("   width:", convertWidth(sum(g_all$widths), "in", valueOnly = TRUE)*2)
+    message("   height:", convertHeight(sum(g_all$heights), "in", valueOnly = TRUE))
   }
 
   # Invisibly return the gtable object

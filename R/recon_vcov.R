@@ -120,7 +120,7 @@ recon_vcov <- function(post, prior.prec=.0001,
 
     # Basic parameter check
     if (dim(post)[1] != dim(X)[2]) {
-      stop("Number of parameters in design matrix does not match posterior covariance matrix.\n")
+      stop("Number of parameters in design matrix does not match posterior covariance matrix.")
     }
 
     # Number of treatments
@@ -167,7 +167,7 @@ recon_vcov <- function(post, prior.prec=.0001,
     message(
       "Likelihood precisions found using NNLS.\n",
       "Residual Sum of Squares: ", format(sol$deviance, digits=6), "\n",
-      "             --------------------      \n"
+      "             --------------------"
     )
 
     # RSS from elements which are fixed (i.e. trying to equate posterior precision with zero)
@@ -176,14 +176,14 @@ recon_vcov <- function(post, prior.prec=.0001,
                          NA)
     rss0 <- ifelse(is.na(ind.R0), 0, sum((R %*% sol$x - s)[ind.R0]^2))
     message(
-      "              RSS fixed: ", format(rss0, digits=6), "\n"
-    )
+		  "              RSS fixed: ", format(rss0, digits=6)
+		)
 
     # RSS from elements which are actually fitted
     rss1 <- ifelse(is.na(ind.R0), sum((R %*% sol$x - s)^2), sum((R %*% sol$x - s)[-ind.R0]^2))
     message(
       "             RSS fitted: ", format(rss1, digits=6), "\n",
-      "             --------------------      \n"
+      "             --------------------"
     )
 
     lik.cov <- diag(1 / sol$x)
@@ -191,7 +191,7 @@ recon_vcov <- function(post, prior.prec=.0001,
     # Check whether any variances calculated are infinite
     inftf <- is.infinite(diag(lik.cov))
     if (any(inftf)) {
-      warning("Returned some infinite variances. These will be not be included in KL calculation.\n")
+      warning("Returned some infinite variances. These will be not be included in KL calculation.")
     }
 
     # Kullback-Leibler Divergence of estimated posterior (arising from fitted
@@ -206,7 +206,7 @@ recon_vcov <- function(post, prior.prec=.0001,
     KL.div <- 1/2 * (sum(diag(solve(post.cov.fit) %*% post)) - dim(post)[1] +
                      log(det(post.cov.fit)/det(post)))
     message("Kullback-Leibler Divergence of fitted from 'true' posterior: ",
-            KL.div, "\n")
+            KL.div)
 
     return(lik.cov)
   }

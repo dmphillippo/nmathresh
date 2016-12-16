@@ -126,12 +126,12 @@ nma_thresh <- function(mean.dk, lhood, post,
   # Get number of data points N
   if (dim(lhood)[1] == dim(lhood)[2]) {
     N <- dim(lhood)[1]
-    message("Likelihood for N = ", N, " data points.\n")
-  } else stop("Likelihood covariance matrix lhood should be square.\n")
+    message("Likelihood for N = ", N, " data points.")
+  } else stop("Likelihood covariance matrix lhood should be square.")
 
   # Get number of treatments
   K <- length(mean.dk) + 1
-  message("Number of treatments is K = ", K, ".\n")
+  message("Number of treatments is K = ", K, ".")
 
   # Check X matrix for FE model
   if (isFE) {
@@ -145,10 +145,10 @@ nma_thresh <- function(mean.dk, lhood, post,
   if (isFE || is.null(mu.design)) {
     m <- 0
   } else if (nrow(mu.design) != N) {
-    stop("Number of rows in mu.design does not equal N.\n")
+    stop("Number of rows in mu.design does not equal N.")
   } else {
     m <- ifelse(is.null(mu.design),0,ncol(mu.design))
-    message("Number of extra parameters in m.design is m = ",m,".\n")
+    message("Number of extra parameters in m.design is m = ",m,".")
   }
 
   # Get number of delta parameters
@@ -158,34 +158,34 @@ nma_thresh <- function(mean.dk, lhood, post,
     stop("Number of rows in delta.design does not equal N.")
   } else {
     n.delta <- ncol(delta.design)
-    message("Number of delta parameters is n.delta = ",n.delta,".\n")
+    message("Number of delta parameters is n.delta = ",n.delta,".")
   }
 
 
   # Check posterior covariance matrix is n.delta+m+K-1 square
   if (nrow(post) != ncol(post)) {
-    stop("Posterior covariance matrix should be square.\n")
+    stop("Posterior covariance matrix should be square.")
   } else if (nrow(post) != n.delta + m + K-1) {
-    if (isFE) stop("Posterior covariance matrix should be K-1 square.\n")
-    else stop("Posterior covariance matrix should be n.delta+m+K-1 square.\n")
+    if (isFE) stop("Posterior covariance matrix should be K-1 square.")
+    else stop("Posterior covariance matrix should be n.delta+m+K-1 square.")
   }
 
   # Treatment rank
   if (length(trt.rank) > 1 | trt.rank != round(trt.rank)) {
-    stop("trt.rank should be a single integer.\n")
+    stop("trt.rank should be a single integer.")
   } else if (trt.rank < 1 | trt.rank > K) {
-    stop("trt.rank should be between 1 and K (number of trts).\n")
+    stop("trt.rank should be between 1 and K (number of trts).")
   }
 
   # Note about recoded treatments
   if (is.null(trt.code)) {
     trt.code <- 1:K
   }
-  else if(length(trt.code) != K) stop("trt.code should be of length K.\n")
+  else if(length(trt.code) != K) stop("trt.code should be of length K.")
   else {
     message("Using recoded treatments. Reference treatment is ", trt.code[1],
         ". Parameter vector is:\n",
-        "\t", paste0("d[", trt.code[-1], "]", collapse=", "), "\n"
+        "\t", paste0("d[", trt.code[-1], "]", collapse=", ")
         )
   }
 
@@ -194,16 +194,15 @@ nma_thresh <- function(mean.dk, lhood, post,
     trt.sub <- trt.code
   } else if(length(trt.sub)>K) stop("Length of trt.sub should be <= K.")
   else {
-    message("Deriving thresholds on a subset of treatments:\n",
-            "\t", paste(trt.sub, collapse=", "), "\n"
-            )
+    message("Deriving thresholds on a subset of treatments:")
+    message("\t", paste(trt.sub, collapse=", "))
   }
 
   trt.sub.internal <- which(trt.code %in% trt.sub)
 
   # Error if trt.rank > length(trt.sub)
   if(trt.rank > length(trt.sub)) {
-    stop("trt.rank is larger than the length of trt.sub\n")
+    stop("trt.rank is larger than the length of trt.sub")
   }
 
 
@@ -281,9 +280,9 @@ nma_thresh <- function(mean.dk, lhood, post,
   }
 
   if (trt.rank == 1) {
-    message("Current optimal treatment is k* = ", trt.code[kstar], ".\n")
+    message("Current optimal treatment is k* = ", trt.code[kstar], ".")
   } else {
-    message("Current rank ", trt.rank, " treatment is k = ", trt.code[kstar], ".\n")
+    message("Current rank ", trt.rank, " treatment is k = ", trt.code[kstar], ".")
   }
 
   # And these contrasts have non-zero elements in the contrast design matrix D
