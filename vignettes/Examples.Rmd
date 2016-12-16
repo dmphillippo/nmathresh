@@ -92,14 +92,13 @@ Construct the design matrix.
 ```{r}
 # Construct the design matrix, with a row for each contrast and K-1 columns (parameters)
 X <- matrix(0, nrow = N, ncol = K-1)
-attach(dat.rawl)
+
 for (i in 1:N){
-  X[i, k[i]-1] <- 1
-  if (b[i] != 1){
-    X[i, b[i]-1] <- -1
+  X[i, dat.rawl$k[i]-1] <- 1
+  if (dat.rawl$b[i] != 1){
+    X[i, dat.rawl$b[i]-1] <- -1
   }
 }
-detach(dat.rawl)
 ```
 
 We are now ready to perform a threshold analysis at the study level. This is made easy using the `nma_thresh` function, which takes the posterior means of the treatment effect parameters, the likelihood and posterior covariance matrices, and the design matrix. We specify `nmatype = "fixed"` to derive thresholds for the FE model, and `opt.max = FALSE` since the optimal treatment is the one which minimises the log odds.
