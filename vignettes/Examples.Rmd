@@ -30,20 +30,26 @@ To run a study level threshold analysis, we require the study data. This is avai
 ```{r}
 dat.raww <- read.delim(system.file("extdata", "Thrombo_data.txt", package = "nmathresh"))
 
+# print first few rows
+head(dat.raww)
+
 n <- nrow(dat.raww)   # number of studies
 ```
 
 Thresholds will be derived on the log odds ratio scale, so we derive log odds ratios against arm 1 as a reference.
 ```{r}
-# Log odds ratios between arms
+# Log OR for two-arm trials, arm 2 vs. 1
 dat.raww$lor.1 <- with(dat.raww, log(r.2 * (n.1 - r.1) / ((n.2 - r.2) * r.1)) )
+
+dat.raww$k.1 <- dat.raww$t.2   # Arm 2 treatment
+dat.raww$b.1 <- dat.raww$t.1   # Reference treatment
+
+
+# Log OR for three-arm trials, arm 3 vs. 1
 dat.raww$lor.2 <- with(dat.raww, log(r.3 * (n.1 - r.1) / ((n.3 - r.3) * r.1)) )
 
-# Record which was treatment and which was baseline for each LOR
-dat.raww$k.1 <- dat.raww$t.2
-dat.raww$b.1 <- dat.raww$t.1
-dat.raww$k.2 <- dat.raww$t.3
-dat.raww$b.2 <- ifelse(is.na(dat.raww$k.2), NA, dat.raww$t.1)
+dat.raww$k.2 <- dat.raww$t.3   # Arm 3 treatment (NA if only 2 arms)
+dat.raww$b.2 <- ifelse(is.na(dat.raww$k.2), NA, dat.raww$t.1)   # Reference treatment
 ```
 
 The likelihood covariance matrix is then constructed in a block diagonal manner, with the aid of `Matrix::bdiag`.
@@ -112,9 +118,11 @@ thresh
 ```
 
 Finally, we will use the function `thresh_forest` to display the thresholds on a forest plot.
+We sort the rows of the plot to display those with smallest thresholds first; this is achieved using the `orderby` option.
+(By default, `thresh_forest` calculates recommended output dimensions, which are useful for saving to PDF. This isn't necessary here, so we set `calcdim = FALSE`.)
 ```{r, fig.width=13, fig.height=5.5, out.width='100%', dpi=300}
 # Display using a forest plot, along with 95% confidence intervals for LORs
-# Labels
+# Create row labels
 dat.rawl$lab <- rep(NA, nrow(dat.rawl))
 for (i in 1:nrow(dat.rawl)) {
   dat.rawl$lab[i] <- paste0(dat.rawl$studyID[i], " (", dat.rawl$k[i], " vs. ", dat.rawl$b[i], ")")
@@ -124,9 +132,9 @@ for (i in 1:nrow(dat.rawl)) {
 dat.rawl$CI2.5 <- dat.rawl$lor + qnorm(.025)*sqrt(diag(V))
 dat.rawl$CI97.5 <- dat.rawl$lor + qnorm(.975)*sqrt(diag(V))
 
-# Sort the studies by proportion of CI covered by invariant interval
+# Calculate the proportion of CI covered by invariant interval, for sorting.
 # Coverage <1 means that the CI extends beyond the bias invariant threshold, and 
-# the threshold is below the level of statistical uncertainty
+# the threshold is below the level of statistical uncertainty.
 dat.rawl$coverage <- apply(cbind(thresh$thresholds$lo / (dat.rawl$CI2.5 - dat.rawl$lor), 
                              thresh$thresholds$hi / (dat.rawl$CI97.5 - dat.rawl$lor)), 
                          1, min, na.rm = TRUE)
@@ -151,7 +159,7 @@ The threshold analysis highlights that the decision is sensitive to bias adjustm
 ### Thresholds for multiple biases
 Continuing at study level, we can consider thresholds for multiple bias adjustments simultaneously. Here, we shall derive thresholds for simultaneous bias adjustments to the two contrasts of the 3-arm study 1.
 ```{r}
-# Data point indices in dataset (dat.rawl)
+# Row numbers of data points in dataset (dat.rawl)
 m1 <- 1  # This point will be adjusted on the x-axis
 m2 <- 2  # This point will be adjusted on the y-axis
 ```
@@ -210,7 +218,7 @@ rm(list = ls())
 ```
 We can also perform a threshold analysis at the contrast level. This does not require the original data, only the joint posterior distribution of the treatment effect parameters.
 
-First, we must reconstruct the likelihood covariance matrix that would have produced the posterior distribution in a FE 1-stage Bayesian NMA, where there was one data point for each contrast compared in one or more studies. To do this, we specify the design matrix of the contrasts with data, and then use the function `recon_vcov` to reconstruct the likelihood covariance matrix.
+First, we must reconstruct the likelihood covariance matrix that would have produced the posterior distribution in a FE 1-stage Bayesian NMA, where there was one data point for each contrast compared in one or more studies. To do this, we specify the design matrix of the contrasts with data (see the network diagram), and then use the function `recon_vcov` to reconstruct the likelihood covariance matrix.
 ```{r}
 K <- 6   # Number of treatments
 
@@ -291,6 +299,9 @@ For a study level analysis, we require the original study data. This is availabl
 # Read study data
 dat.raww <- read.delim(system.file("extdata", "SocAnx_data.txt", package = "nmathresh"))
 
+# Print first few rows
+head(dat.raww)
+
 n <- nrow(dat.raww)   # Number of studies
 
 # Turn wide study data into long with one row for each arm
@@ -344,7 +355,7 @@ thresh <- nma_thresh(mean.dk = SocAnx.post.summary$statistics[ind.d, "Mean"],
                      opt.max = FALSE)
 ```
 
-A forest plot is then constructed using `thresh_forest`. The full forest plot is very large, with 146 rows. To save space, we only display contrasts with thresholds smaller than 2 SMD. We achieve this easily by using the `orderby` option, which here specifies a call to the `order` function -- ordering the rows by the variable `ord` (here derived as the absolute value of the smallest threshold) and removing any `NA` rows with `na.last = NA` (here where thresholds are larger than 2 SMD).
+A forest plot is then constructed using `thresh_forest`. The full forest plot is very large, with 146 rows. To save space, we only display contrasts with thresholds smaller than 2 SMD. We achieve this easily by using the `orderby` option, which here specifies a call to the `order` function -- ordering the rows by the variable `ord` (here derived as the coverage ratio of the invariant interval to the CI, so smallest thresholds first) and removing any `NA` rows with `na.last = NA` (here where thresholds are larger than 2 SMD).
 ```{r, fig.width=14, fig.height=9.5, out.width='100%', dpi=300}
 # 95% CIs
 dat.rawl$CI2.5 <- with(dat.rawl, y + qnorm(0.025)*sqrt(Var))
@@ -387,6 +398,9 @@ We can also perform a threshold analysis on the social anxiety NMA at the contra
 First, we reconstruct the likelihood covariance matrix. Since there are many studies, we won't construct the contrast design matrix by hand (though this is perfectly possible); instead, we use the treatment details from the study data.
 ```{r}
 trt.dat <- read.delim(system.file("extdata", "SocAnx_data.txt", package = "nmathresh"))[, 1:6]
+
+head(trt.dat)   # Print first few rows
+
 K <- with(trt.dat, length(unique(c(t.1, t.2, t.3, t.4, t.5)))) -1  # Number of treatments , -1 for NA
 
 # work out which contrasts have data
