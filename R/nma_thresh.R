@@ -2,9 +2,10 @@
 #'
 #' This function calculates decision-invariant bias-adjustment thresholds and
 #' intervals for Bayesian network meta-analysis, as described by Phillippo
-#' \emph{et al.} (2016). Thresholds are derived from the joint posterior, and
-#' reflect the amount of change to a data point before the treatment decision
-#' changes. Calculation is achieved using fast matrix operations.
+#' \emph{et al.} (under review). Thresholds are derived from the joint
+#' posterior, and reflect the amount of change to a data point before the
+#' treatment decision changes. Calculation is achieved using fast matrix
+#' operations.
 #'
 #' @param mean.dk Posterior means of basic treatment parameters \eqn{d_k}.
 #' @param lhood Likelihood (data) covariance matrix.
@@ -30,26 +31,23 @@
 #'
 #' @details This function provides bias-adjustment threshold analysis for both
 #'   fixed and random effects NMA models, as described by Phillippo \emph{et
-#'   al.} (2016). Parameters \code{mean.dk}, \code{lhood}, and \code{post} are
-#'   always required, however there are differences in the specification of
-#'   \code{post} and other required parameters and between the fixed and random
-#'   effects cases:
+#'   al.} (under review). Parameters \code{mean.dk}, \code{lhood}, and
+#'   \code{post} are always required, however there are differences in the
+#'   specification of \code{post} and other required parameters and between the
+#'   fixed and random effects cases:
 #'
-#'   \describe{
-#'   \item{\strong{FE models}}{The design matrix \code{X} for basic treatment
-#'   parameters is required. The posterior covariance matrix specified in
-#'   \code{post} should only refer to the basic treatment parameters.}
+#'   \describe{ \item{\strong{FE models}}{The design matrix \code{X} for basic
+#'   treatment parameters is required. The posterior covariance matrix specified
+#'   in \code{post} should only refer to the basic treatment parameters.}
 #'   \item{\strong{RE models}}{The design matrix \code{mu.design} for additional
 #'   parameters (e.g. covariates) is required, as is the design matrix
 #'   \code{delta.design} for random effects terms. The posterior covariance
 #'   matrix specified in \code{post} should refer to the basic treatment
 #'   parameters, RE terms, and additional parameters \emph{in that order}; i.e.
 #'   \code{post} should be the posterior covariance matrix of the vector
-#'   \eqn{(d^T, \delta^T, \mu^T)^T}.}
-#'   }
+#'   \eqn{(d^T, \delta^T, \mu^T)^T}.} }
 #'
-#' @section Model details:
-#'   \strong{The FE NMA model}
+#' @section Model details: \strong{The FE NMA model}
 #'
 #'   The fixed effects NMA model is assumed to be of the form \describe{
 #'   \item{Prior:}{\eqn{d \sim \mathrm{N} ( d_0, \Sigma_d )}}

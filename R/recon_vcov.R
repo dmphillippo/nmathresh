@@ -14,17 +14,17 @@
 #' @param verbose Print intermediate matrices? Defaults to FALSE.
 #'
 #' @details Full details of the calculation are given by Phillippo \emph{et al.}
-#'   (2016). Briefly, the aim is to recover the contrast-level likelihood
-#'   covariance matrix \eqn{V} that would have led to the posterior covariance
-#'   matrix \eqn{\Sigma} being obtained from a fixed effects NMA, with design
-#'   matrix \eqn{X} and prior covariance matrix \eqn{\Sigma_d} for a normal
-#'   prior on the basic treatment parameters. This is possible in this case via
-#'   the equation (resulting from conjugacy):
+#'   (under review). Briefly, the aim is to recover the contrast-level
+#'   likelihood covariance matrix \eqn{V} that would have led to the posterior
+#'   covariance matrix \eqn{\Sigma} being obtained from a fixed effects NMA,
+#'   with design matrix \eqn{X} and prior covariance matrix \eqn{\Sigma_d} for a
+#'   normal prior on the basic treatment parameters. This is possible in this
+#'   case via the equation (resulting from conjugacy):
 #'
 #'   \deqn{\Sigma^{-1} = X^TV^{-1}X + \Sigma_d^{-1}.}
 #'
-#'   When the treatment network is complete (i.e. fully connected), this equation
-#'   may be rearranged exactly.
+#'   When the treatment network is complete (i.e. fully connected), this
+#'   equation may be rearranged exactly.
 #'
 #'   When the treatment network is incomplete (i.e. not all treatments are
 #'   directly compared), this equation may be solved through the use of
