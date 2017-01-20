@@ -66,8 +66,11 @@ thresh_2d <- function(thresh, idx, idy,
   intarray[,,2] <- linedat[, "gradient"] * intarray[,,1] + linedat[, "intercept"]
 
   # Intercept array to data frame [x,y]
-  intdat <- data.frame(x = intarray[,,1][upper.tri(intarray[,,1])],
-                       y = intarray[,,2][upper.tri(intarray[,,2])])
+  uptri <- upper.tri(intarray[,,1])
+  intdat <- data.frame(x = intarray[,,1][uptri],
+                       y = intarray[,,2][uptri],
+                       l1 = matrix(rep(1:(K-1), times = K-1), nrow = K-1)[uptri],
+                       l2 = matrix(rep(1:(K-1), each = K-1), nrow = K-1)[uptri])
 
   # Calculate invariant region
   # For each threshold line:
@@ -114,6 +117,13 @@ thresh_2d <- function(thresh, idx, idy,
   #   y = c(6.7, 9.5, -1.2),
   #   lab = paste0("paste(tilde(k),'* = ',", c(6, 5, 4),")")
   # )
+  labdat <- list(x=NA_real_, y=NA_real_, lab=NA_character_)
+  for (i in 1:(K-1)) {
+    labdat$x[i] <- mean(IRdat[IRdat$l1 == i | IRdat$l2 == i, "x"])
+    labdat$y[i] <- mean(IRdat[IRdat$l1 == i | IRdat$l2 == i, "y"])
+    labdat$lab[i] <- paste0("paste(tilde(k),'* = ',", i + (i>=thresh$kstar), ")")
+  }
+  labdat <- as.data.frame(labdat)
 
 
   # Construct plot
@@ -133,8 +143,8 @@ thresh_2d <- function(thresh, idx, idy,
     #ggplot2::geom_point(ggplot2::aes(x = x, y = y), data = intdat, colour = ifelse(inIR, "red", "black")) +
 
     # Line labels
-    # ggplot2::geom_label(ggplot2::aes(x = x, y = y, label = lab),
-    #                     data = labdat, parse = TRUE) +
+    ggplot2::geom_label(ggplot2::aes(x = x, y = y, label = lab),
+                        data = labdat, parse = TRUE, na.rm = TRUE) +
 
     # Axis labels
     ggplot2::xlab(xlab) +
