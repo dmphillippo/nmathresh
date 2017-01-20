@@ -39,7 +39,7 @@
 thresh_2d <- function(thresh, idx, idy,
                       xlab = "Adjustment to data point 1", ylab = "Adjustment to data point 2",
                       xlim = NULL, ylim = NULL,
-                      breaks = waiver(), xbreaks = breaks, ybreaks = breaks,
+                      breaks = ggplot2::waiver(), xbreaks = breaks, ybreaks = breaks,
                       fill = rgb(.72, .80, .93, .7),
                       lwd = 1,
                       fontsize = 12){
@@ -103,6 +103,10 @@ thresh_2d <- function(thresh, idx, idy,
 
   # Invariant region data
   IRdat <- intdat[inIR, ]
+
+  # Sort into clockwise order
+  IRdat$angle <- atan2(IRdat$y, IRdat$x)
+  IRdat <- IRdat[order(IRdat$angle),]
 
   # Label data
   # labdat <- data.frame(
