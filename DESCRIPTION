@@ -13,12 +13,12 @@ Imports:
     grid,
     gridExtra,
     gtable,
-    Matrix
+    Matrix,
+    ggplot2
 Depends: R (>= 3.0.1)
 RoxygenNote: 6.0.1
 Suggests: 
     knitr,
     rmarkdown,
-    coda,
-    ggplot2
+    coda
 VignetteBuilder: knitr
