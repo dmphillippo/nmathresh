@@ -301,25 +301,13 @@ nma_thresh <- function(mean.dk, lhood, post,
   contr.trt.sub <- trt.sub.internal[-which(trt.sub.internal == kstar)] -
     (trt.sub.internal[-which(trt.sub.internal == kstar)] >= kstar)*1
 
-  # Fix for when using trt.sub to only pick out two treatments, threshmat.kstar is then only
-  # one row which apply doesn't like
-  if(grepl("matrix",class(threshmat.kstar[contr.trt.sub,]), ignore.case=T)){
     thresholds <- as.data.frame(
       do.call(rbind,
-              apply(threshmat.kstar[contr.trt.sub,], 2,
+              apply(threshmat.kstar[contr.trt.sub, , drop = FALSE], 2,
                     get.int, kstar, trt.code, trt.sub
                     )
               )
       )
-  } else {
-    thresholds <- as.data.frame(
-      do.call(rbind,
-              apply(t(as.matrix(threshmat.kstar[contr.trt.sub,])), 2,
-                    get.int, kstar, trt.code, trt.sub
-                    )
-              )
-      )
-  }
 
 
 ## Return thresh object ----------------------------------------------------
