@@ -107,16 +107,41 @@ thresh_2d <- function(thresh, idx, idy,
   # Invariant region data
   IRdat <- intdat[inIR, ]
 
-  # Sort into clockwise order
+  # Check that the invariant region is closed.
+  # If it isn't, add some lines out of view to close it.
+  # If no lines are parallel, then there is at most one open side, and we can:
+  #   - Check if any lines enter only one vertex
+  #   - If so, add a new edge between the two lines, closing the IR
+
+  IRlines <- unique(c(IRdat$l1, IRdat$l2))  # Which lines bound the IR?
+
+  # Check for parallel boundaries
+  if (anyDuplicated(IRdat[IRlines, "gradient"])) {
+    warning("Parallel boundary lines of the invariant region, may break shading/labelling for now.")
+  }
+  # No parallel lines, so see if there are any entering only one vertex
+  else if (any(tabulate(c(IRdat$l1, IRdat$l2)) == 1)) {
+
+    # List the edges with an open end
+    oedge <- which(tabulate(c(IRdat$l1, IRdat$l2)) == 1)
+
+    # Check which end is open between the two
+    osign <- sign(intdat[intdat$l1 %in% oedge & intdat$l2 %in% oedge, "x"])
+
+    # Add a vertex on each open line way past the view window
+    # Note: can't use xlim as if NULL is calculated by ggplot
+    for (i in 1:2){
+      IRdat <- rbind(IRdat,
+                     data.frame(x = -osign*1E5,
+                                y = -linedat[oedge[i], "gradient"]*1E5 + linedat[oedge[i], "intercept"],
+                                l1 = oedge[i], l2 = -999))
+    }
+  }
+
+  # Sort vertices into clockwise order
   IRdat$angle <- atan2(IRdat$y, IRdat$x)
   IRdat <- IRdat[order(IRdat$angle),]
 
-  # Label data
-  # labdat <- data.frame(
-  #   x = c(-0.8, 0.03, -0.5),
-  #   y = c(6.7, 9.5, -1.2),
-  #   lab = paste0("paste(tilde(k),'* = ',", c(6, 5, 4),")")
-  # )
   labdat <- list(x=NA_real_, y=NA_real_, lab=NA_character_)
   for (i in 1:(K-1)) {
     labdat$x[i] <- mean(IRdat[IRdat$l1 == i | IRdat$l2 == i, "x"])
