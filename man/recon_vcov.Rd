@@ -73,4 +73,3 @@ lik.cov <- recon_vcov(Thrombo.post.cov, prior.prec = .0001, X = X)
 \seealso{
 \code{\link{nma_thresh}}.
 }
-

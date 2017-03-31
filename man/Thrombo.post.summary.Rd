@@ -31,4 +31,3 @@ Caldwell DM, Ades AE, Higgins JPT. Simultaneous comparison of
 \code{\link[coda]{summary.mcmc}}, \code{\link{Thrombo.post.cov}}
 }
 \keyword{datasets}
-

@@ -3,6 +3,7 @@
 \name{d_ab2i}
 \alias{d_ab2i}
 \alias{d_i2ab}
+\alias{d_i2ab}
 \title{Convert contrast indexing}
 \usage{
 d_ab2i(a, b, K)
@@ -34,6 +35,7 @@ use to the advanced user.
 
 \item \code{d_i2ab}: Convert \eqn{d_{ab}} type indices to \code{d[i]} type indices.
 }}
+
 \note{
 By convention, \eqn{1 \le a < b \le K}. If this is not the case, an
   error will be thrown. For a given number of treatments \eqn{K}, the total
@@ -45,4 +47,3 @@ d_ab2i(c(1,1,1, 2,2, 3), c(2,3,4, 3,4, 4), K=4)
 d_i2ab(1:6, K=4)
 
 }
-

@@ -24,4 +24,3 @@ Caldwell DM, Ades AE, Higgins JPT. Simultaneous comparison of
 \code{\link{Thrombo.post.summary}}
 }
 \keyword{datasets}
-
