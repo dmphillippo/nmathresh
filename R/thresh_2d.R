@@ -39,7 +39,7 @@
 thresh_2d <- function(thresh, idx, idy,
                       xlab = "Adjustment to data point 1", ylab = "Adjustment to data point 2",
                       xlim = NULL, ylim = NULL,
-                      breaks = ggplot2::waiver(), xbreaks = breaks, ybreaks = breaks,
+                      breaks = waiver(), xbreaks = breaks, ybreaks = breaks,
                       fill = rgb(.72, .80, .93, .7),
                       lwd = 1,
                       fontsize = 12){
@@ -127,35 +127,35 @@ thresh_2d <- function(thresh, idx, idy,
 
 
   # Construct plot
-  ggplot2::ggplot() +
+  ggplot() +
 
     # Axes
-    ggplot2::geom_hline(yintercept = 0, linetype = 2, colour = "grey40") +
-    ggplot2::geom_vline(xintercept = 0, linetype = 2, colour = "grey40") +
+    geom_hline(yintercept = 0, linetype = 2, colour = "grey40") +
+    geom_vline(xintercept = 0, linetype = 2, colour = "grey40") +
 
     # Threshold lines
-    ggplot2::geom_abline(ggplot2::aes(intercept = intercept, slope = gradient),
-                         data = linedat, colour = "grey60") +
+    geom_abline(aes(intercept = intercept, slope = gradient),
+                data = linedat, colour = "grey60") +
 
     # Invariant region
-    ggplot2::geom_polygon(ggplot2::aes(x = x, y = y), data = IRdat,
-                          fill = fill, colour = "black") +
-    #ggplot2::geom_point(ggplot2::aes(x = x, y = y), data = intdat, colour = ifelse(inIR, "red", "black")) +
+    geom_polygon(aes(x = x, y = y), data = IRdat,
+                 fill = fill, colour = "black") +
+    #geom_point(aes(x = x, y = y), data = intdat, colour = ifelse(inIR, "red", "black")) +
 
     # Line labels
-    ggplot2::geom_label(ggplot2::aes(x = x, y = y, label = lab),
-                        data = labdat, parse = TRUE, na.rm = TRUE) +
+    geom_label(aes(x = x, y = y, label = lab),
+               data = labdat, parse = TRUE, na.rm = TRUE) +
 
     # Axis labels
-    ggplot2::xlab(xlab) +
-    ggplot2::ylab(ylab) +
+    xlab(xlab) +
+    ylab(ylab) +
 
     # Axis setup
-    ggplot2::coord_cartesian(xlim = xlim, ylim = ylim) +
-    ggplot2::scale_x_continuous(breaks = xbreaks) +
-    ggplot2::scale_y_continuous(breaks = ybreaks) +
+    coord_cartesian(xlim = xlim, ylim = ylim) +
+    scale_x_continuous(breaks = xbreaks) +
+    scale_y_continuous(breaks = ybreaks) +
 
     # Theme
-    ggplot2::theme_bw() +
-    ggplot2::theme(panel.grid = ggplot2::element_blank())
+    theme_bw() +
+    theme(panel.grid = element_blank())
 }

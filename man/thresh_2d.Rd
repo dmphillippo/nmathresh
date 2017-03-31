@@ -6,7 +6,7 @@
 \usage{
 thresh_2d(thresh, idx, idy, xlab = "Adjustment to data point 1",
   ylab = "Adjustment to data point 2", xlim = NULL, ylim = NULL,
-  breaks = ggplot2::waiver(), xbreaks = breaks, ybreaks = breaks,
+  breaks = waiver(), xbreaks = breaks, ybreaks = breaks,
   fill = rgb(0.72, 0.8, 0.93, 0.7), lwd = 1, fontsize = 12)
 }
 \arguments{
