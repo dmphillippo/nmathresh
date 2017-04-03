@@ -115,6 +115,22 @@ thresh_2d <- function(thresh, idx, idy,
 
   IRlines <- unique(c(IRdat$l1, IRdat$l2))  # Which lines bound the IR?
 
+  # Set some values for xlim/ylim if not given, rather than leaving it up to
+  # ggplot. We also use these values at this stage, so we need them before
+  # ggplot is called anyway. Make the view window large enough to contain the
+  # vertices of the IR (and the x/y intercepts, in the open case), times a small
+  # expansion factor.
+  if (is.null(xlim)) {
+    xlim <- range(IRdat$x, thresh$Ukstar[IRlines, idx], na.rm = TRUE, finite = TRUE) * 1.1
+    if (xlim[1] >= 0) xlim[1] <- -xlim[2]
+    if (xlim[2] <= 0) xlim[2] <- -xlim[1]
+  }
+  if (is.null(ylim)) {
+    ylim <- range(IRdat$y, thresh$Ukstar[IRlines, idy], na.rm = TRUE, finite = TRUE) * 1.1
+    if (ylim[1] >= 0) ylim[1] <- -ylim[2]
+    if (ylim[2] <= 0) ylim[2] <- -ylim[1]
+  }
+
   # Check for parallel boundaries
   if (anyDuplicated(IRdat[IRlines, "gradient"])) {
     warning("Parallel boundary lines of the invariant region, may break shading/labelling for now.")
@@ -126,16 +142,22 @@ thresh_2d <- function(thresh, idx, idy,
     oedge <- which(tabulate(c(IRdat$l1, IRdat$l2)) == 1)
 
     # Check which end is open between the two
+    # Note: osign is the half of the x-axis where the two edges intersect, so
+    # the open end is on the other side.
     osign <- sign(intdat[intdat$l1 %in% oedge & intdat$l2 %in% oedge, "x"])
+
 
     # Add a vertex on each open line way past the view window
     # Note: can't use xlim as if NULL is calculated by ggplot
     for (i in 1:2){
       IRdat <- rbind(IRdat,
-                     data.frame(x = -osign*1E5,
-                                y = -linedat[oedge[i], "gradient"]*1E5 + linedat[oedge[i], "intercept"],
+                     data.frame(x = xlim[ifelse(osign == 1, 1, 2)]*1.2,
+                                y = linedat[oedge[i], "gradient"]*xlim[ifelse(osign == 1, 1, 2)]*1.2 + linedat[oedge[i], "intercept"],
                                 l1 = oedge[i], l2 = -999))
     }
+
+    # Provide a note to the user that an open invariant region was found
+    message("NOTE: The resulting invariant region is open at one side. There is no threshold boundary in this direction.")
   }
 
   # Sort vertices into clockwise order
