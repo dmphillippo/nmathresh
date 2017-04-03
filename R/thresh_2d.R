@@ -193,16 +193,15 @@ thresh_2d <- function(thresh, idx, idy,
     geom_vline(xintercept = 0, linetype = 2, colour = "grey40") +
 
     # Threshold lines
-    geom_abline(aes(intercept = intercept, slope = gradient),
+    geom_abline(aes_string(intercept = "intercept", slope = "gradient"),
                 data = linedat, colour = "grey60") +
 
     # Invariant region
-    geom_polygon(aes(x = x, y = y), data = IRdat,
+    geom_polygon(aes_string(x = "x", y = "y"), data = IRdat,
                  fill = fill, colour = "black") +
-    #geom_point(aes(x = x, y = y), data = intdat, colour = ifelse(inIR, "red", "black")) +
 
     # Line labels
-    geom_label(aes(x = x, y = y, label = lab),
+    geom_label(aes_string(x = "x", y = "y", label = "lab"),
                data = labdat, parse = TRUE, na.rm = TRUE) +
 
     # Axis labels
