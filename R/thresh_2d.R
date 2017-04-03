@@ -37,7 +37,7 @@
 #' @examples
 #'
 thresh_2d <- function(thresh, idx, idy,
-                      xlab = "Adjustment to data point 1", ylab = "Adjustment to data point 2",
+                      xlab = paste("Adjustment to data point", idx), ylab = paste("Adjustment to data point", idy),
                       xlim = NULL, ylim = NULL,
                       breaks = waiver(), xbreaks = breaks, ybreaks = breaks,
                       fill = rgb(.72, .80, .93, .7),
@@ -164,14 +164,26 @@ thresh_2d <- function(thresh, idx, idy,
   IRdat$angle <- atan2(IRdat$y, IRdat$x)
   IRdat <- IRdat[order(IRdat$angle),]
 
-  labdat <- list(x=NA_real_, y=NA_real_, lab=NA_character_)
-  for (i in 1:(K-1)) {
-    labdat$x[i] <- mean(IRdat[IRdat$l1 == i | IRdat$l2 == i, "x"])
-    labdat$y[i] <- mean(IRdat[IRdat$l1 == i | IRdat$l2 == i, "y"])
-    labdat$lab[i] <- paste0("paste(tilde(k),'* = ',", i + (i>=thresh$kstar), ")")
-  }
-  labdat <- as.data.frame(labdat)
+  # Create line labels data frame
+  labdat <- linedat[IRlines, ]
+  labdat$l <- IRlines
 
+  # Labels
+  labdat$lab <- paste0("paste(tilde(k),'* = ',", labdat$l + (labdat$l >= thresh$kstar), ")")
+
+  # Get min and max x values of visible invariant region boundard lines
+  for (i in 1:length(IRlines)){
+    labdat[i, "x1"] <- max(xlim[1],
+                           min(IRdat[IRdat$l1 == labdat[i, "l"] | IRdat$l2 == labdat[i, "l"], "x"]),
+                           min((ylim - labdat[i, "intercept"])/labdat[i, "gradient"]))
+
+    labdat[i, "x2"] <- min(xlim[2],
+                           max(IRdat[IRdat$l1 == labdat[i, "l"] | IRdat$l2 == labdat[i, "l"], "x"]),
+                           max((ylim - labdat[i, "intercept"])/labdat[i, "gradient"]))
+  }
+
+  labdat$x <- rowMeans(labdat[, c("x1", "x2")])
+  labdat$y <- labdat$gradient * labdat$x + labdat$intercept
 
   # Construct plot
   ggplot() +
