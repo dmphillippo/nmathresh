@@ -26,4 +26,3 @@ Data frame of thresholds and new optimal treatments with columns
 This function is intended for internal use only, and is called by
 \code{nma_thresh} automatically.
 }
-

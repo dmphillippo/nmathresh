@@ -146,4 +146,3 @@ thresh_forest(thresh, contr.mean, CI2.5, CI97.5, label = lab, data = plotdat,
               xlim = c(-.3, .3), refline = 0, digits = 2)
 
 }
-

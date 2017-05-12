@@ -94,6 +94,7 @@ This function provides bias-adjustment threshold analysis for both
   sensible prior. In the RE case, the threshold derivations make the
   approximation that \eqn{\tau^2} is fixed and known.
 }
+
 \examples{
 # Please see the vignette "Examples" for worked examples including use of
 # this function, including more information on the brief code below.
@@ -129,4 +130,3 @@ thresh <- nma_thresh(mean.dk = Thrombo.post.summary$statistics[1:(K-1), "Mean"],
 \code{\link{recon_vcov}}, \code{\link{thresh_forest}},
   \code{\link{thresh-class}}.
 }
-

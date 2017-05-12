@@ -37,4 +37,3 @@ Mayo-Wilson E, Dias S, Mavranezouli I, Kew K, Clark DM, Ades AE,
 \code{\link[coda]{summary.mcmc}}, \code{\link{SocAnx.post.cov}}
 }
 \keyword{datasets}
-
