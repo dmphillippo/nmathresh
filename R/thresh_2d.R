@@ -206,7 +206,7 @@ thresh_2d <- function(thresh, idx, idy,
   # Labels
   labdat$lab <- paste0("paste(tilde(k),'* = ',", labdat$l + (labdat$l >= thresh$kstar), ")")
 
-  # Get min and max x values of visible invariant region boundard lines
+  # Get min and max x values of visible invariant region bounded lines
   for (i in 1:length(IRlines)){
     labdat[i, "x1"] <- max(xlim[1],
                            min(IRdat[IRdat$l1 == labdat[i, "l"] | IRdat$l2 == labdat[i, "l"], "x"]),
@@ -219,6 +219,10 @@ thresh_2d <- function(thresh, idx, idy,
 
   labdat$x <- rowMeans(labdat[, c("x1", "x2")])
   labdat$y <- labdat$gradient * labdat$x + labdat$intercept
+
+  # Derive alignment of each label to try to avoid overlap with boundary of IR
+  labdat$vjust <- ifelse(labdat$intercept < 0, 1, 0)
+  labdat$hjust <- ifelse(-labdat$intercept/labdat$gradient < 0, 1, 0)
 
   # Construct plot
   ggplot() +
@@ -236,7 +240,8 @@ thresh_2d <- function(thresh, idx, idy,
                  fill = fill, colour = "black") +
 
     # Line labels
-    geom_label(aes_string(x = "x", y = "y", label = "lab"),
+    geom_label(aes_string(x = "x", y = "y", label = "lab",
+                          vjust = "vjust", hjust = "hjust"),
                data = labdat, parse = TRUE, na.rm = TRUE) +
 
     # Axis labels
