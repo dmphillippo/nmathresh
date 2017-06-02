@@ -262,7 +262,7 @@ thresh_forest <- function(thresh,
   g_all <- gtable_add_cols(g_tab, unit(1, "null"))
 
   for (i in 1:Nrows) {
-    # Create forset plot row as grob
+    # Create forest plot row as grob
     g_for <- with(pd[i, ], forestgrob(y, CI.lo, CI.hi, II.lo, II.hi,
                                       xlim, CI.lwd, II.cols, II.colw, II.lwd, pointsize)
                   )
