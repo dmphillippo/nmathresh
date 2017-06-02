@@ -22,7 +22,7 @@
 #'   confidence/credible intervals (\code{CI.lo}, \code{CI.hi}), and row labels
 #'   \code{labels}. If \code{data} is not provided, the above variables will be
 #'   searched for in the calling environment.
-#' @param CI.title Title for CI column, default "95\% Credible Interval".
+#' @param CI.title Title for CI column, default "95\% Confidence Interval".
 #' @param label.title Character string giving the heading for the row labels
 #'   column.
 #' @param y.title Character string giving the heading for the data points
