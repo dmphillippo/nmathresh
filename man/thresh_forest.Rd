@@ -9,7 +9,8 @@ thresh_forest(thresh, y, CI.lo, CI.hi, label, orderby = NULL, data = NULL,
   y.title = "Mean", xlab = "", xlim = NULL, sigfig = 3, digits = NULL,
   refline = NULL, clinsig = NULL, cutoff = NULL, II.colw = rgb(0.72,
   0.8, 0.93), II.cols = rgb(0.93, 0.72, 0.8), II.lwd = 8, CI.lwd = 1,
-  pointsize = 4, fontsize = 12, xbreaks = NULL, calcdim = TRUE)
+  pointsize = 4, fontsize = 12, xbreaks = NULL, calcdim = display,
+  display = TRUE)
 }
 \arguments{
 \item{thresh}{A \code{thresh} object, as produced by
@@ -82,11 +83,13 @@ be cut off and marked as NT (no threshold). Not set by default.}
 
 \item{calcdim}{Logical, calculate suggested output dimensions for saving to
 pdf? Calculates output size when \code{TRUE}; saves time when \code{FALSE}.}
+
+\item{display}{Logical, display the plot? Defaults to \code{TRUE}.}
 }
 \value{
-Displays the forest plot on the current plot device. Also returns
-  invisibly the underlying \code{gtable} object, which could be further
-  manipulated.
+Displays the forest plot on the current plot device (if \code{display
+  = TRUE}). Also returns invisibly the underlying \code{gtable} object, which
+  can be further manipulated.
 }
 \description{
 This function produces threshold forest plots, overlaying the

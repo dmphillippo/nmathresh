@@ -50,10 +50,11 @@
 #' @param xbreaks Position of tick marks on the x-axis as a numeric vector.
 #' @param calcdim Logical, calculate suggested output dimensions for saving to
 #'   pdf? Calculates output size when \code{TRUE}; saves time when \code{FALSE}.
+#' @param display Logical, display the plot? Defaults to \code{TRUE}.
 #'
-#' @return Displays the forest plot on the current plot device. Also returns
-#'   invisibly the underlying \code{gtable} object, which could be further
-#'   manipulated.
+#' @return Displays the forest plot on the current plot device (if \code{display
+#'   = TRUE}). Also returns invisibly the underlying \code{gtable} object, which
+#'   can be further manipulated.
 #' @export
 #'
 #' @import gtable grid gridExtra grDevices
@@ -121,7 +122,7 @@ thresh_forest <- function(thresh,
                          II.cols = rgb(.93, .72, .80),
                          II.lwd = 8, CI.lwd = 1,
                          pointsize = 4, fontsize = 12,
-                         xbreaks = NULL, calcdim = TRUE){
+                         xbreaks = NULL, calcdim = display, display = TRUE){
 
   # Evaluate data arguments
   y <- eval(substitute(y), data, parent.frame())
@@ -317,8 +318,10 @@ thresh_forest <- function(thresh,
   g_all <- gtable_add_padding(g_all, unit(c(.5, 1, .5, .5), "lines"))
 
   # Plot
-  grid.newpage()
-  grid.draw(g_all)
+  if (display){
+    grid.newpage()
+    grid.draw(g_all)
+  }
 
   # Print sizes for easy saving
   if (calcdim) {
