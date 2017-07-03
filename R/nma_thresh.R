@@ -116,7 +116,7 @@ nma_thresh <- function(mean.dk, lhood, post,
                        nmatype="fixed",
                        X=NULL,
                        mu.design=NULL, delta.design=diag(nrow=dim(lhood)),
-                       opt.max=TRUE, trt.rank=1, trt.bestn=1,
+                       opt.max=TRUE, trt.rank=1L, trt.bestn=1L,
                        trt.code=NULL, trt.sub=NULL) {
 
 
@@ -183,6 +183,16 @@ nma_thresh <- function(mean.dk, lhood, post,
     stop("trt.rank should be between 1 and K (number of trts).")
   }
 
+  # Best n treatments, overrides trt.rank with a warning
+  if (length(trt.bestn) > 1 | trt.bestn != round(trt.bestn)) {
+    stop("trt.bestn should be a single integer")
+  } else if (trt.bestn < 1 | trt.bestn > K) {
+    stop("trt.bestn should be between 1 and K (number of trts).")
+  } else if (trt.rank > 1 & trt.bestn > 1) {
+    warning("trt.rank and trt.bestn specified - only trt.bestn will be used.")
+    trt.rank <- 1L
+  }
+
   # Note about recoded treatments
   if (is.null(trt.code)) {
     trt.code <- 1:K
@@ -209,6 +219,11 @@ nma_thresh <- function(mean.dk, lhood, post,
   # Error if trt.rank > length(trt.sub)
   if(trt.rank > length(trt.sub)) {
     stop("trt.rank is larger than the length of trt.sub")
+  }
+
+  # Error if trt.bestn > length(trt.sub)
+  if(trt.bestn > length(trt.sub)) {
+    stop("trt.bestn is larger than the length of trt.sub")
   }
 
 
