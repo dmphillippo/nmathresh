@@ -180,14 +180,14 @@ nma_thresh <- function(mean.dk, lhood, post,
   if (length(trt.rank) > 1 | trt.rank != round(trt.rank)) {
     stop("trt.rank should be a single integer.")
   } else if (trt.rank < 1 | trt.rank > K) {
-    stop("trt.rank should be between 1 and K (number of trts).")
+    stop("trt.rank should be between 1 and K.")
   }
 
   # Best n treatments, overrides trt.rank with a warning
   if (length(trt.bestn) > 1 | trt.bestn != round(trt.bestn)) {
-    stop("trt.bestn should be a single integer")
-  } else if (trt.bestn < 1 | trt.bestn > K) {
-    stop("trt.bestn should be between 1 and K (number of trts).")
+    stop("trt.bestn should be a single integer.")
+  } else if (trt.bestn < 1 | trt.bestn > K-1) {
+    stop("trt.bestn should be between 1 and K-1.")
   } else if (trt.rank > 1 & trt.bestn > 1) {
     warning("trt.rank and trt.bestn specified - only trt.bestn will be used.")
     trt.rank <- 1L
@@ -222,8 +222,8 @@ nma_thresh <- function(mean.dk, lhood, post,
   }
 
   # Error if trt.bestn > length(trt.sub)
-  if(trt.bestn > length(trt.sub)) {
-    stop("trt.bestn is larger than the length of trt.sub")
+  if(trt.bestn >= length(trt.sub)) {
+    stop("trt.bestn should be less than the length of trt.sub")
   }
 
 
@@ -289,53 +289,51 @@ nma_thresh <- function(mean.dk, lhood, post,
   threshmat <- sweep(1 / (D %*% inflmat),1, -contr, "*")
 
   # Add rownames
-  rownames(threshmat) <- paste0("d[",
-                                row(t(D.aug))[t(D.aug) == -1], ",",
-                                row(t(D.aug))[t(D.aug) == 1],
-                                "]")
+  contr.ab <- d_i2ab(1:(K*(K-1)/2), K)
+  rownames(threshmat) <- paste0("d[", contr.ab$a, ",", contr.ab$b, "]")
 
   # Now we only need to look at contrasts involving the optimal treatment k*
   # Updated to handle trt.rank, to pick out other ranked treatments than the
   # optimal treatment k* in first place.
   # Updated to handle trt.sub, only look for k* in a subset of treatments.
 
+  # Ignore treatments not in trt.sub
   mean.dk.subNA <- mean.dk
   mean.dk.subNA[!(1:(K-1) %in% (trt.sub.internal - 1))] <- NA
 
-  if (opt.max){
-    kstar <- order(c(0, mean.dk.subNA), decreasing=TRUE)[trt.rank]
-  }
-  else if (!opt.max){
-    kstar <- order(c(0, mean.dk.subNA), decreasing=FALSE)[trt.rank]
-  }
-
-  if (trt.rank == 1) {
-    message("Current optimal treatment is k* = ", trt.code[kstar], ".")
+  # Get optimal treatment (or set of treatments)
+  if (trt.bestn > 1) {
+    kstar <- order(c(0, mean.dk.subNA), decreasing=opt.max)[1:trt.bestn]
   } else {
-    message("Current rank ", trt.rank, " treatment is k = ", trt.code[kstar], ".")
+    kstar <- order(c(0, mean.dk.subNA), decreasing=opt.max)[trt.rank]
   }
 
-  # And these contrasts have non-zero elements in the contrast design matrix D
-  if (kstar > 1) {
-    contr.kstar <- which(D[,kstar-1] != 0)
+  if (trt.rank == 1 & trt.bestn == 1) {
+    message("Current optimal treatment is k* = ", trt.code[kstar], ".")
+  } else if (trt.bestn == 1) {
+    message("Current rank ", trt.rank, " treatment is k = ", trt.code[kstar], ".")
+  } else {
+    message("Current best ", trt.bestn, " treatments are k = ",
+            paste(trt.code[kstar], collapse = ", "), ".")
   }
-  else {
-    contr.kstar <- 1:(K-1)
-  }
+
+  # Pick out contrasts involving the optimal treatment(s)
+  # For trt.bestn > 1, ignore contrasts between treatments in the set k*
+  # Only include rows which correspond to contrasts with treatments in trt.sub
+  contr.kstar <- which(
+    rowSums(cbind(contr.ab$a %in% kstar, contr.ab$b %in% kstar)) == 1 &
+    contr.ab$a %in% trt.sub.internal & contr.ab$b %in% trt.sub.internal
+    )
 
   # So we look in the corresponding rows of the threshold matrix
-  threshmat.kstar <- threshmat[contr.kstar,]
+  threshmat.kstar <- threshmat[contr.kstar, , drop = FALSE]
 
 
 ## Derive thresholds -------------------------------------------------------
 
-  # Only look in rows which correspond to contrasts with treatments in trt.sub
-  contr.trt.sub <- trt.sub.internal[-which(trt.sub.internal == kstar)] -
-    (trt.sub.internal[-which(trt.sub.internal == kstar)] >= kstar)*1
-
     thresholds <- as.data.frame(
       do.call(rbind,
-              apply(threshmat.kstar[contr.trt.sub, , drop = FALSE], 2,
+              apply(threshmat.kstar, 2,
                     get.int, kstar, trt.code, trt.sub
                     )
               )

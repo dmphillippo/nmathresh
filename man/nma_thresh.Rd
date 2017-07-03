@@ -6,7 +6,7 @@
 \usage{
 nma_thresh(mean.dk, lhood, post, nmatype = "fixed", X = NULL,
   mu.design = NULL, delta.design = diag(nrow = dim(lhood)),
-  opt.max = TRUE, trt.rank = 1, trt.bestn = 1, trt.code = NULL,
+  opt.max = TRUE, trt.rank = 1L, trt.bestn = 1L, trt.code = NULL,
   trt.sub = NULL)
 }
 \arguments{
