@@ -22,6 +22,9 @@
 #'   (TRUE, default) or the minimum (FALSE).
 #' @param trt.rank Rank of the treatment to derive thresholds for. Defaults to
 #'   1, thresholds for the optimum treatment.
+#' @param trt.bestn Derive thresholds for a decision over the best
+#'   \code{trt.bestn} treatments. Defaults to 1, thresholds for the single
+#'   optimum treatment only. Overrides \code{trt.rank}, with a warning.
 #' @param trt.code Treatment codings of the reference trt and in the parameter
 #'   vector \eqn{d_k}. Use if treatments re-labelled or re-ordered. Default is
 #'   equivalent to 1:K.
@@ -113,7 +116,8 @@ nma_thresh <- function(mean.dk, lhood, post,
                        nmatype="fixed",
                        X=NULL,
                        mu.design=NULL, delta.design=diag(nrow=dim(lhood)),
-                       opt.max=TRUE, trt.rank=1, trt.code=NULL, trt.sub=NULL) {
+                       opt.max=TRUE, trt.rank=1, trt.bestn=1,
+                       trt.code=NULL, trt.sub=NULL) {
 
 
 ## Basic parameter checks --------------------------------------------------
@@ -331,6 +335,7 @@ nma_thresh <- function(mean.dk, lhood, post,
            delta.design = delta.design,
            opt.max = opt.max,
            trt.rank = trt.rank,
+           trt.bestn = trt.bestn,
            trt.code = trt.code,
            trt.sub = trt.sub
            )
