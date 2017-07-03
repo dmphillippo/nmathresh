@@ -46,10 +46,10 @@ column.}
 \item{y.title}{Character string giving the heading for the data points
 column, default "Mean".}
 
-\item{xlab}{Character string giving the label for the x-axis.}
+\item{xlab}{Character string giving the label for the \eqn{x}-axis.}
 
 \item{xlim}{Numeric vector (length 2) of lower and upper limits for the
-x-axis. If not set, tries to choose a sensible default.}
+\eqn{x}-axis. If not set, tries to choose a sensible default.}
 
 \item{sigfig}{Number of significant digits to display in the table. Default
 3.}
@@ -79,7 +79,8 @@ be cut off and marked as NT (no threshold). Not set by default.}
 
 \item{fontsize}{Base font size. Default 12.}
 
-\item{xbreaks}{Position of tick marks on the x-axis as a numeric vector.}
+\item{xbreaks}{Position of tick marks on the \eqn{x}-axis as a numeric
+vector.}
 
 \item{calcdim}{Logical, calculate suggested output dimensions for saving to
 pdf? Calculates output size when \code{TRUE}; saves time when \code{FALSE}.}

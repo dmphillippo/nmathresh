@@ -27,9 +27,9 @@
 #'   column.
 #' @param y.title Character string giving the heading for the data points
 #'   column, default "Mean".
-#' @param xlab Character string giving the label for the x-axis.
+#' @param xlab Character string giving the label for the \eqn{x}-axis.
 #' @param xlim Numeric vector (length 2) of lower and upper limits for the
-#'   x-axis. If not set, tries to choose a sensible default.
+#'   \eqn{x}-axis. If not set, tries to choose a sensible default.
 #' @param sigfig Number of significant digits to display in the table. Default
 #'   3.
 #' @param digits Number of decimal places to display in the table. Overrides
@@ -47,7 +47,8 @@
 #' @param CI.lwd Line width of confidence/credible intervals. Default 1.
 #' @param pointsize Point size for forest plot means. Default 4.
 #' @param fontsize Base font size. Default 12.
-#' @param xbreaks Position of tick marks on the x-axis as a numeric vector.
+#' @param xbreaks Position of tick marks on the \eqn{x}-axis as a numeric
+#'   vector.
 #' @param calcdim Logical, calculate suggested output dimensions for saving to
 #'   pdf? Calculates output size when \code{TRUE}; saves time when \code{FALSE}.
 #' @param display Logical, display the plot? Defaults to \code{TRUE}.

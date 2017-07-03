@@ -25,7 +25,7 @@ abbreviated.}
 Defaults to NULL (no extra parameters).}
 
 \item{delta.design}{[RE models only] Design matrix for delta, defaults to the
-NxN identity matrix.}
+\eqn{N \times N}{N x N} identity matrix.}
 
 \item{opt.max}{Should the optimal decision be the maximal treatment effect
 (TRUE, default) or the minimum (FALSE).}
@@ -34,7 +34,7 @@ NxN identity matrix.}
 1, thresholds for the optimum treatment.}
 
 \item{trt.code}{Treatment codings of the reference trt and in the parameter
-vector d_k. Use if treatments re-labelled or re-ordered. Default is
+vector \eqn{d_k}. Use if treatments re-labelled or re-ordered. Default is
 equivalent to 1:K.}
 
 \item{trt.sub}{Only look at thresholds in this subset of treatments in
@@ -75,9 +75,10 @@ This function provides bias-adjustment threshold analysis for both
  \strong{The FE NMA model}
 
   The fixed effects NMA model is assumed to be of the form \describe{
-  \item{Prior:}{\eqn{d \sim \mathrm{N} ( d_0, \Sigma_d )}}
-  \item{Likelihood:}{\eqn{y|d \sim \mathrm{N} ( \delta, V )}} \item{FE
-  model:}{\eqn{\delta = Xd + M\mu}} }
+  \item{Prior:}{\eqn{d \sim \mathrm{N} ( d_0, \Sigma_d )}{d ~ N(d_0,
+  \Sigma_d)}}
+  \item{Likelihood:}{\eqn{y|d \sim \mathrm{N} ( \delta, V )}{y|d ~ N(\delta,
+  V)}} \item{FE model:}{\eqn{\delta = Xd + M\mu}} }
 
   The additional parameters \eqn{\mu} may be given any sensible prior; they
   do not affect the threshold analysis in any way.
@@ -86,9 +87,12 @@ This function provides bias-adjustment threshold analysis for both
 
   The random effects NMA model is assumed to be of the form \describe{
   \item{Priors:}{\eqn{ d \sim \mathrm{N} ( d_0, \Sigma_d ), \quad \mu \sim
-  \mathrm{N} ( \mu_0, \Sigma_\mu )}} \item{Likelihood:}{\eqn{y|d,\mu,\tau^2
-  \sim \mathrm{N} ( L\delta + M\mu, V )}} \item{RE model:}{\eqn{\delta \sim
-  \mathrm{N} ( Xd, \tau^2 )}} }
+  \mathrm{N} ( \mu_0, \Sigma_\mu )}{d ~ N(d_0, \Sigma_d), \mu ~ N(\mu_0,
+  \Sigma_\mu)}}
+  \item{Likelihood:}{\eqn{y|d,\mu,\tau^2 \sim \mathrm{N} ( L\delta + M\mu, V
+  )}{y|d,\mu,\tau^2 ~ N(L\delta + M\mu, V)}}
+  \item{RE model:}{\eqn{\delta \sim \mathrm{N} ( Xd, \tau^2 )}{\delta ~ N(Xd,
+  \tau^2)}} }
 
   The between-study heterogeneity parameter \eqn{\tau^2} may be given any
   sensible prior. In the RE case, the threshold derivations make the
