@@ -248,6 +248,9 @@ nma_thresh <- function(mean.dk, lhood, post,
   # Create vector of contrasts d_ab
   contr <- as.vector(D %*% mean.dk)
 
+  # Augmented version of D to include a left column for d_1
+  D.aug <- cbind(c(rep(-1, K-1), rep(0, (K-2)*(K-1)/2)), D)
+
 
 ## Derive influence matrix -------------------------------------------------
 
@@ -284,6 +287,12 @@ nma_thresh <- function(mean.dk, lhood, post,
 ## Derive solution matrix U -------------------------------------------------
 
   threshmat <- sweep(1 / (D %*% inflmat),1, -contr, "*")
+
+  # Add rownames
+  rownames(threshmat) <- paste0("d[",
+                                row(t(D.aug))[t(D.aug) == -1], ",",
+                                row(t(D.aug))[t(D.aug) == 1],
+                                "]")
 
   # Now we only need to look at contrasts involving the optimal treatment k*
   # Updated to handle trt.rank, to pick out other ranked treatments than the
