@@ -24,7 +24,7 @@ A \code{summary.mcmc} object of the type produced by the \code{coda} package,
 containing the requisite posterior summary information on the variables
 \code{d} (basic treatment effect parameters), \code{delta} (shrunken random
 effects estimates for each study), and \code{diff} (contrasts of treatment
-effect paramters).
+effect parameters).
 }
 \references{
 Mayo-Wilson E, Dias S, Mavranezouli I, Kew K, Clark DM, Ades AE,

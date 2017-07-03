@@ -4,7 +4,7 @@
 #' containing the requisite posterior summary information on the variables
 #' \code{d} (basic treatment effect parameters), \code{delta} (shrunken random
 #' effects estimates for each study), and \code{diff} (contrasts of treatment
-#' effect paramters).
+#' effect parameters).
 #'
 #' @format A \code{summary.mcmc} object. The key components for our use are:
 #'   \describe{ \item{statistics}{Matrix containing the posterior summary
