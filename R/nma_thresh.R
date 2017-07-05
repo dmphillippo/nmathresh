@@ -318,12 +318,11 @@ nma_thresh <- function(mean.dk, lhood, post,
   }
 
   # Pick out contrasts involving the optimal treatment(s)
-  # For trt.bestn > 1, ignore contrasts between treatments in the set k*
-  # Only include rows which correspond to contrasts with treatments in trt.sub
+  # For trt.bestn > 1, include contrasts between treatments in the set k* --
+  # they will not affect the threshold, but they will inform the ranking.
   contr.kstar <- which(
-    rowSums(cbind(contr.ab$a %in% kstar, contr.ab$b %in% kstar)) == 1 &
-    contr.ab$a %in% trt.sub.internal & contr.ab$b %in% trt.sub.internal
-    )
+    (contr.ab$a %in% kstar & contr.ab$b %in% trt.sub.internal) |
+    (contr.ab$b %in% kstar & contr.ab$a %in% trt.sub.internal) )
 
   # So we look in the corresponding rows of the threshold matrix
   threshmat.kstar <- threshmat[contr.kstar, , drop = FALSE]
