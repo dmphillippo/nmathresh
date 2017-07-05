@@ -392,38 +392,82 @@ nma_thresh <- function(mean.dk, lhood, post,
 #'
 get.int <- function(x, kstar, trt.code, trt.sub) {
 
+  # Get internal recoded treatment list (possibly subset)
   trt.sub.internal <- which(trt.code %in% trt.sub)
 
+  K <- length(trt.code)
+
+  # Which rows have been passed in from a column of Ukstar?
+  d_ab <- d_i2ab(1:(K*(K-1)/2), K)
+  d_ab <- d_ab[(d_ab$a %in% kstar & d_ab$b %in% trt.sub.internal) |
+                 (d_ab$b %in% kstar & d_ab$a %in% trt.sub.internal) , ]
+
+  # Which contrasts are for thresholds (others are for switches within k*, if trt.bestn > 1)
+  threshctr <- xor(d_ab$a %in% kstar, d_ab$b %in% kstar)
+
+  xsub <- x[threshctr]
+
   # If both thresholds are infinite
-  if (all(is.infinite(x))) {
+  if (all(is.infinite(xsub))) {
     hi <- Inf
     lo <- -Inf
-    hi.newkstar <- lo.newkstar <- NA
+    hi.newkstar <- lo.newkstar <- NA_character_
 
-  # If lower threshold is infinite
-  } else if (all(x[!is.infinite(x)] > 0)) {
-    hi <- min(x[!is.infinite(x)])
-    hi.newkstar <-
-      trt.code[trt.sub.internal[which(x==hi) + (which(x==hi) >= which(trt.sub.internal==kstar))*1]]
+    # If lower threshold is infinite
+  } else if (all(xsub[!is.infinite(xsub)] > 0)) {
+    hi <- min(xsub[!is.infinite(xsub)])
+    hi.newkstar <- fnewkstar(x[x > 0 & !is.infinite(x)], d_ab[x > 0 & !is.infinite(x), ], hi, kstar, trt.code, trt.sub)
+
     lo <- -Inf
-    lo.newkstar <- NA
+    lo.newkstar <- NA_character_
 
-  # If upper threshold is infinite
-  } else if (all(x[!is.infinite(x)] < 0)) {
+    # If upper threshold is infinite
+  } else if (all(xsub[!is.infinite(xsub)] < 0)) {
     hi <- Inf
-    hi.newkstar <- NA
-    lo <- max(x[!is.infinite(x)])
-    lo.newkstar <-
-      trt.code[trt.sub.internal[which(x==lo) + (which(x==lo) >= which(trt.sub.internal==kstar))*1]]
+    hi.newkstar <- NA_character_
+    lo <- max(xsub[!is.infinite(xsub)])
+    lo.newkstar <- fnewkstar(x[x < 0 & !is.infinite(x)], d_ab[x < 0 & !is.infinite(x), ], lo, kstar, trt.code, trt.sub)
 
-  # If neither threshold is infinite
+    # If neither threshold is infinite
   } else {
-    hi <- min(x[x>0 & !is.infinite(x)])
+    hi <- min(xsub[xsub > 0 & !is.infinite(xsub)])
     hi.newkstar <-
-      trt.code[trt.sub.internal[which(x==hi) + (which(x==hi) >= which(trt.sub.internal==kstar))*1]]
-    lo <- max(x[x<0 & !is.infinite(x)])
+      fnewkstar(x[x > 0 & !is.infinite(x)], d_ab[x > 0 & !is.infinite(x), ], hi, kstar, trt.code, trt.sub)
+    lo <- max(xsub[xsub < 0 & !is.infinite(xsub)])
     lo.newkstar <-
-      trt.code[trt.sub.internal[which(x==lo) + (which(x==lo) >= which(trt.sub.internal==kstar))*1]]
+      fnewkstar(x[x < 0 & !is.infinite(x)], d_ab[x < 0 & !is.infinite(x), ], lo, kstar, trt.code, trt.sub)
   }
-  return(data.frame(lo=lo,lo.newkstar=lo.newkstar,hi=hi,hi.newkstar=hi.newkstar))
+
+  # To report new k* when trt.bestn >1, must translate into character strings
+  tlo.newkstar <- paste0(lo.newkstar, collapse = ", ")
+  thi.newkstar <- paste0(hi.newkstar, collapse = ", ")
+
+  return(data.frame(lo=lo, lo.newkstar=tlo.newkstar, hi=hi, hi.newkstar=thi.newkstar))
+}
+
+# Internal function to calculate new k* from a set of all +ve or all -ve solutions
+fnewkstar <- function(xsub, d_absub, thr, kstar, trt.code, trt.sub){
+
+  newkstar <- kstar
+  xsub <- abs(xsub)
+  thr <- abs(thr)
+
+  # Only concerned with elements up to the threshold
+  ord <- order(xsub[xsub <= thr])
+  xsub.lthr <- xsub[xsub <= thr][ord]
+  d_absub.lthr <- d_absub[xsub <= thr, ][ord, ]
+
+  nx <- length(xsub.lthr)
+  for (i in 1:nx) {
+    # Step along the solution vector, switching treatment ranks as we go
+      temp <- newkstar
+      temp[newkstar == d_absub.lthr[i, "a"]] <- d_absub.lthr[i, "b"]
+      temp[newkstar == d_absub.lthr[i, "b"]] <- d_absub.lthr[i, "a"]
+      newkstar <- temp
+  }
+
+  # Translate recoded treatments
+  newkstar <- trt.code[newkstar]
+
+  return(newkstar)
 }
