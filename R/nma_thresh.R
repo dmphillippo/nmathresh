@@ -330,14 +330,12 @@ nma_thresh <- function(mean.dk, lhood, post,
 
 ## Derive thresholds -------------------------------------------------------
 
-    thresholds <- as.data.frame(
+    thresholds <-
       do.call(rbind,
               apply(threshmat.kstar, 2,
                     get.int, kstar, trt.code, trt.sub
                     )
               )
-      )
-
 
 ## Return thresh object ----------------------------------------------------
   return(structure(
@@ -416,7 +414,9 @@ get.int <- function(x, kstar, trt.code, trt.sub) {
     # If lower threshold is infinite
   } else if (all(xsub[!is.infinite(xsub)] > 0)) {
     hi <- min(xsub[!is.infinite(xsub)])
-    hi.newkstar <- fnewkstar(x[x > 0 & !is.infinite(x)], d_ab[x > 0 & !is.infinite(x), ], hi, kstar, trt.code, trt.sub)
+    hi.newkstar <-
+      paste0(fnewkstar(x[x > 0 & !is.infinite(x)], d_ab[x > 0 & !is.infinite(x), ], hi, kstar, trt.code, trt.sub),
+             collapse = ", ")
 
     lo <- -Inf
     lo.newkstar <- NA_character_
@@ -426,23 +426,23 @@ get.int <- function(x, kstar, trt.code, trt.sub) {
     hi <- Inf
     hi.newkstar <- NA_character_
     lo <- max(xsub[!is.infinite(xsub)])
-    lo.newkstar <- fnewkstar(x[x < 0 & !is.infinite(x)], d_ab[x < 0 & !is.infinite(x), ], lo, kstar, trt.code, trt.sub)
+    lo.newkstar <-
+      paste0(fnewkstar(x[x < 0 & !is.infinite(x)], d_ab[x < 0 & !is.infinite(x), ], lo, kstar, trt.code, trt.sub),
+             collapse = ", ")
 
     # If neither threshold is infinite
   } else {
     hi <- min(xsub[xsub > 0 & !is.infinite(xsub)])
     hi.newkstar <-
-      fnewkstar(x[x > 0 & !is.infinite(x)], d_ab[x > 0 & !is.infinite(x), ], hi, kstar, trt.code, trt.sub)
+      paste0(fnewkstar(x[x > 0 & !is.infinite(x)], d_ab[x > 0 & !is.infinite(x), ], hi, kstar, trt.code, trt.sub),
+             collapse = ", ")
     lo <- max(xsub[xsub < 0 & !is.infinite(xsub)])
     lo.newkstar <-
-      fnewkstar(x[x < 0 & !is.infinite(x)], d_ab[x < 0 & !is.infinite(x), ], lo, kstar, trt.code, trt.sub)
+      paste0(fnewkstar(x[x < 0 & !is.infinite(x)], d_ab[x < 0 & !is.infinite(x), ], lo, kstar, trt.code, trt.sub),
+             collapse = ", ")
   }
 
-  # To report new k* when trt.bestn >1, must translate into character strings
-  tlo.newkstar <- paste0(lo.newkstar, collapse = ", ")
-  thi.newkstar <- paste0(hi.newkstar, collapse = ", ")
-
-  return(data.frame(lo=lo, lo.newkstar=tlo.newkstar, hi=hi, hi.newkstar=thi.newkstar))
+  return(data.frame(lo=lo, lo.newkstar=lo.newkstar, hi=hi, hi.newkstar=hi.newkstar, stringsAsFactors = FALSE))
 }
 
 # Internal function to calculate new k* from a set of all +ve or all -ve solutions
