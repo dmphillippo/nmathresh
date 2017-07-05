@@ -64,12 +64,12 @@
 #'                      X = X,
 #'                      opt.max = FALSE)
 #'
-#' # Produce an invariant region for simultaneous adjustments to both arms of Study 1
+#' # Produce an invariant region for simultaneous adjustments to the bodies of
+#' # evidence on contrasts 2 vs. 1 and 3 vs. 1
 #' thresh_2d(thresh, 1, 2,
-#'           xlab = "Adjustment in Study 1 LOR: 3 vs. 1",
-#'           ylab = "Adjustment in Study 1 LOR: 4 vs. 1",
-#'           xlim = c(-1.5, 0.5), ylim = c(-2, 14),
-#'           ybreaks = seq(-2, 14, 2))
+#'           xlab = "Adjustment to contrast 2 vs. 1",
+#'           ylab = "Adjustment to contrast 3 vs. 1",
+#'           xlim = c(-1, 1), ylim = c(-1.5, 0.5))
 #'
 thresh_2d <- function(thresh, idx, idy,
                       xlab = paste("Adjustment to data point", idx), ylab = paste("Adjustment to data point", idy),
