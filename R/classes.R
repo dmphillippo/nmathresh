@@ -44,20 +44,21 @@
 NULL
 
 #' @export
-print.thresh <- function(x, ...){
+print.thresh <- function(x, n = 6L, ...){
 
   cat("A thresh object. For help, see ?'thresh-class'.\n\n")
 
   if (x$call$trt.rank == 1) {
-    cat("Base-case optimal treatment is k* = ", x$kstar, ".\n\n", sep="")
+    cat("Base-case optimal treatment is k* = ", x$kstar, ".\n\n", sep = "")
   } else {
     cat("Base-case rank ", x$call$trt.rank, " treatment is k* = ",
-        x$kstar, ".\n\n", sep="")
+        x$kstar, ".\n\n", sep = "")
   }
 
-  print(utils::head(x$thresholds), ...)
+  print(utils::head(x$thresholds, n), ...)
 
   N <- nrow(x$thresholds)
-  if (N > 6) cat("... ", N-6, " further rows omitted ...", sep="")
+  if (N > n & n > 0) cat("... ", N - n, " further rows omitted ...", sep = "")
+  else if (n < 0 & -n < N) cat("... ", -n, " further rows omitted ...", sep = "")
 
 }
