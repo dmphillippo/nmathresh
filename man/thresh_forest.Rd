@@ -6,11 +6,11 @@
 \usage{
 thresh_forest(thresh, y, CI.lo, CI.hi, label, orderby = NULL, data = NULL,
   CI.title = "95\% Confidence Interval", label.title = "",
-  y.title = "Mean", xlab = "", xlim = NULL, sigfig = 3, digits = NULL,
-  refline = NULL, clinsig = NULL, cutoff = NULL, II.colw = rgb(0.72,
-  0.8, 0.93), II.cols = rgb(0.93, 0.72, 0.8), II.lwd = 8, CI.lwd = 1,
-  pointsize = 4, fontsize = 12, xbreaks = NULL, calcdim = display,
-  display = TRUE)
+  y.title = "Mean", II.title = "Invariant Interval", xlab = "",
+  xlim = NULL, sigfig = 3, digits = NULL, refline = NULL,
+  clinsig = NULL, cutoff = NULL, II.colw = rgb(0.72, 0.8, 0.93),
+  II.cols = rgb(0.93, 0.72, 0.8), II.lwd = 8, CI.lwd = 1, pointsize = 4,
+  fontsize = 12, xbreaks = NULL, calcdim = display, display = TRUE)
 }
 \arguments{
 \item{thresh}{A \code{thresh} object, as produced by
@@ -45,6 +45,9 @@ column.}
 
 \item{y.title}{Character string giving the heading for the data points
 column, default "Mean".}
+
+\item{II.title}{Title for invariant interval column, default "Invariant
+Interval".}
 
 \item{xlab}{Character string giving the label for the \eqn{x}-axis.}
 

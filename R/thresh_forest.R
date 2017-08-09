@@ -27,6 +27,8 @@
 #'   column.
 #' @param y.title Character string giving the heading for the data points
 #'   column, default "Mean".
+#' @param II.title Title for invariant interval column, default "Invariant
+#'   Interval".
 #' @param xlab Character string giving the label for the \eqn{x}-axis.
 #' @param xlim Numeric vector (length 2) of lower and upper limits for the
 #'   \eqn{x}-axis. If not set, tries to choose a sensible default.
@@ -116,7 +118,8 @@
 thresh_forest <- function(thresh,
                          y, CI.lo, CI.hi, label, orderby = NULL, data = NULL,
                          CI.title = "95% Confidence Interval",
-                         label.title = "", y.title = "Mean", xlab = "",
+                         label.title = "", y.title = "Mean",
+                         II.title = "Invariant Interval", xlab = "",
                          xlim = NULL, sigfig = 3, digits = NULL,
                          refline = NULL, clinsig = NULL, cutoff = NULL,
                          II.colw = rgb(.72, .80, .93),
@@ -231,7 +234,7 @@ thresh_forest <- function(thresh,
     d = pd[, c("lab.clinshort", "label", "y.txt", "CI.txt",
             "lo.newkstar.txt", "II.txt", "hi.newkstar.txt")],
     rows = NULL,
-    cols = c("", label.title, y.title, CI.title, "", "Invariant Interval", ""),
+    cols = c("", label.title, y.title, CI.title, "", II.title, ""),
     theme = gridExtra::ttheme_minimal(
       base_size = fontsize,
       core = list(fg_params = list(
