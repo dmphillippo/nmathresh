@@ -234,7 +234,7 @@ thresh_forest <- function(thresh,
     d = pd[, c("lab.clinshort", "label", "y.txt", "CI.txt",
             "lo.newkstar.txt", "II.txt", "hi.newkstar.txt")],
     rows = NULL,
-    cols = c("", label.title, y.title, CI.title, "", II.title, ""),
+    cols = c("", label.title, y.title, CI.title, "", as.character(II.title), ""),
     theme = gridExtra::ttheme_minimal(
       base_size = fontsize,
       core = list(fg_params = list(
@@ -246,7 +246,8 @@ thresh_forest <- function(thresh,
         )),
       colhead = list(fg_params = list(
         hjust = c(0, 0,.5, .5, 1,.5, 1),
-        x = c(0, 0,.5, .5, .5, .5, .5)
+        x = c(0, 0,.5, .5, .5, .5, .5),
+        parse = c(FALSE, FALSE, FALSE, FALSE, FALSE, is.expression(II.title), FALSE)
         ))
       )
     )
