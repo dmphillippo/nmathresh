@@ -241,7 +241,7 @@ thresh_forest <- function(thresh,
     theme = gridExtra::ttheme_minimal(
       base_size = fontsize,
       core = list(fg_params = list(
-        hjust = rep(c(0, 0,.5, .5, 1,.5, 1), each = Nrows),
+        hjust = rep(c(0, 0, 0, .5, 1,.5, 1), each = Nrows),
         x = rep(c(.6, 0,.5, .5, .5, .5, .5), each = Nrows),
         fontface = c(rep("plain", Nrows), pd$lab.ff, rep("plain", Nrows*5)),
         vjust = rep(c(1, .5, .5, .5, .5, .5, .5), each = Nrows),
@@ -271,6 +271,16 @@ thresh_forest <- function(thresh,
 
   g_tab$widths[[5]] <- g_tab$widths[[5]] + extrawidth
   g_tab$widths[[7]] <- g_tab$widths[[7]] + extrawidth
+
+  # Align the mean column at the decimal point
+  # Get string widths to left of dp
+  y.strwd <- lapply(gsub("(-?[0-9]+[.]?)[0-9]+", "\\1", pd$y.txt), function(x) unit(1, "strwidth", x))
+
+  # Find grobs for mean column, update x location
+  meancol <- which(g_tab$layout$l == 3 & g_tab$layout$name == "core-fg")
+  for (i in 1:length(meancol)) {
+    g_tab$grobs[[meancol[i]]]$x <- unit(0.5, "npc") - y.strwd[[i]]
+  }
 
   # Set number of table columns
   Ntabcols <- 7
