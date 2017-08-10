@@ -237,7 +237,7 @@ thresh_forest <- function(thresh,
     d = pd[, c("lab.clinshort", "label", "y.txt", "CI.txt",
             "lo.newkstar.txt", "II.txt", "hi.newkstar.txt")],
     rows = NULL,
-    cols = c("", label.title, y.title, CI.title, "", as.character(II.title), ""),
+    cols = c("", label.title, y.title, CI.title, "", "", ""),
     theme = gridExtra::ttheme_minimal(
       base_size = fontsize,
       core = list(fg_params = list(
@@ -251,13 +251,29 @@ thresh_forest <- function(thresh,
         hjust = c(0, 0,.5, .5, 1,.5, 1),
         vjust = c(0, 0, 0, 0, 0, 0, 0),
         x = c(0, 0,.5, .5, .5, .5, .5),
-        y = c(.25, .25, .25, .25, .25, .25, .25),
-        parse = c(FALSE, FALSE, FALSE, FALSE, FALSE, is.expression(II.title), FALSE)
+        y = c(.25, .25, .25, .25, .25, .25, .25)
         ))
       )
     )
 
-  Ntabcols <- 7   # set number of table columns
+  # Add II header separately, so that it spans the newkstar columns as well
+  II.title.grob <- textGrob(label = II.title,
+                            y = 0.25, hjust = 0.5, vjust = 0,
+                            gp = g_tab$grobs[[4]]$gp)  # Copy gp from CI column header
+  g_tab <- gtable_add_grob(g_tab,
+                           grobs = II.title.grob,
+                           t = 1, b = 1, l = 5, r = 7)
+
+  # If II header is really long, add extra width to either side of newkstar columns
+  extrawidth <- max(unit(1, "grobwidth", II.title.grob) -
+                      sum(g_tab$widths[[5]], g_tab$widths[[6]], g_tab$widths[[7]]),
+                    unit(0, "mm")) * 0.5
+
+  g_tab$widths[[5]] <- g_tab$widths[[5]] + extrawidth
+  g_tab$widths[[7]] <- g_tab$widths[[7]] + extrawidth
+
+  # Set number of table columns
+  Ntabcols <- 7
 
   # Header underline
   g_tab <- gtable_add_grob(g_tab,
