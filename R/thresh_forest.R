@@ -229,6 +229,9 @@ thresh_forest <- function(thresh,
   # na.last = NA.)
   Nrows <- nrow(pd)
 
+  # Make expression II.title bold
+  if(is.expression(II.title)) II.title <- eval(bquote(expression(bold(.(II.title[[1]])))))
+
   # Arrange table
   g_tab <- tableGrob(
     d = pd[, c("lab.clinshort", "label", "y.txt", "CI.txt",
@@ -246,7 +249,9 @@ thresh_forest <- function(thresh,
         )),
       colhead = list(fg_params = list(
         hjust = c(0, 0,.5, .5, 1,.5, 1),
+        vjust = c(0, 0, 0, 0, 0, 0, 0),
         x = c(0, 0,.5, .5, .5, .5, .5),
+        y = c(.25, .25, .25, .25, .25, .25, .25),
         parse = c(FALSE, FALSE, FALSE, FALSE, FALSE, is.expression(II.title), FALSE)
         ))
       )
