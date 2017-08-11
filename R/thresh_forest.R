@@ -238,16 +238,16 @@ thresh_forest <- function(thresh,
     theme = gridExtra::ttheme_minimal(
       base_size = fontsize,
       core = list(fg_params = list(
-        hjust = rep(c(0, 0, .5, .5, .5, .5, .5), each = Nrows),
-        x = rep(c(.6, 0, .5, .5, .5, .5, .5), each = Nrows),
         fontface = c(rep("plain", Nrows), pd$lab.ff, rep("plain", Nrows*5)),
         vjust = rep(c(1, .5, .5, .5, .5, .5, .5), each = Nrows),
+        hjust = rep(c(0, 0, .5, .5, .5, .5, .5), each = Nrows),
+        x = rep(c(.6, 0, .5, .5, .5, .5, .5), each = Nrows),
         y = rep(c(1, .5, .5, .5, .5, .5, .5), each = Nrows)
         )),
       colhead = list(fg_params = list(
         hjust = c(0, 0, .5, .5, .5, .5, .5),
-        x = c(0, 0, .5, .5, .5, .5, .5)
         vjust = c(0, 0, 0, 0, 0, 0, 0),
+        x = c(0, 0, .5, .5, .5, .5, .5),
         y = c(.25, .25, .25, .25, .25, .25, .25)
         ))
       )
