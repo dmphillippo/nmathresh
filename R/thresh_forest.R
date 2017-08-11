@@ -240,7 +240,7 @@ thresh_forest <- function(thresh,
       core = list(fg_params = list(
         fontface = c(rep("plain", Nrows), pd$lab.ff, rep("plain", Nrows*5)),
         vjust = rep(c(1, .5, .5, .5, .5, .5, .5), each = Nrows),
-        hjust = rep(c(0, 0, .5, .5, .5, .5, .5), each = Nrows),
+        hjust = rep(c(0, 0, 0, .5, .5, .5, .5), each = Nrows),
         x = rep(c(.6, 0, .5, .5, .5, .5, .5), each = Nrows),
         y = rep(c(1, .5, .5, .5, .5, .5, .5), each = Nrows)
         )),
