@@ -566,15 +566,13 @@ For a more detailed explanation and interpretation of these forest plots see Phi
 
 We may also assess the impact of adjusting for common biases of this nature simultaneously. Again, this is done by manipulating the set of $u_{ak^*,m}$ values to derive threshold lines (the boundaries where treatment $a$ replaces treatment $k^*$ as optimal). With adjustment for common pharmacological treatment bias on the $x$-axis and adjustment for common psychological treatment bias on the $y$-axis, the $y$ intercept of each line is the sum of all $u_{ak^*,m}$ values over the psychological data points (i.e. the one-dimensional threshold solutions). Similarly, the $x$ intercept of each line is the sum of all $u_{ak^*,m}$ values over the pharmacological data points.
 
-Instead of deriving the threshold lines by hand using `U.drugs` and `U.psych`, we will modify the `thresh` object input to `thresh_2d`. We replace the `Ukstar` matrix with a column for the threshold solutions for the combined drug data points `U.drugs`, and a column for threshold solutions for the combined psychological data points `U.psych`.
-```{r}
-thresh.drugpsych <- thresh
-thresh.drugpsych$Ukstar <- matrix(NA, nrow = K-1, ncol = 2)
-thresh.drugpsych$Ukstar[, 1] <- U.drugs
-thresh.drugpsych$Ukstar[, 2] <- U.psych
-```
-Internally, `thresh_2d` uses the `thresh.drugpsych$Ukstar` matrix to derive the threshold lines with gradient `- U.psych / U.drugs` and intercept `U.psych`, and we then take advantage of the automated plotting routines:
+Instead of deriving the threshold lines by hand using `U.drugs` and `U.psych`, we will assemble a bare-bones `thresh` object for input to `thresh_2d`, to take advantage of the automated plotting routines. The `Ukstar` matrix has a column for the threshold solutions for the combined drug data points `U.drugs`, and a column for threshold solutions for the combined psychological data points `U.psych`. `thresh_2d` also uses `kstar`, so we include that too. Internally, `thresh_2d` uses the `Ukstar` matrix to derive the threshold lines with gradient `- U.psych / U.drugs` and intercept `U.psych`.
 ```{r, fig.width=8, fig.height=8, out.width='80%', dpi=300}
+thresh.drugpsych <- list(
+  Ukstar = cbind(U.drugs, U.psych),
+  kstar = thresh$kstar
+)
+
 thresh_2d(thresh.drugpsych, 1, 2,
           xlab = "SMD adjustment: Drug vs. Inactive",
           ylab = "SMD adjustment: Psych vs. Inactive",
