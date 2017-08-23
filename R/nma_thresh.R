@@ -341,7 +341,8 @@ nma_thresh <- function(mean.dk, lhood, post,
            opt.max = opt.max,
            trt.rank = trt.rank,
            trt.code = trt.code,
-           trt.sub = trt.sub
+           trt.sub = trt.sub,
+           mcid.new = mcid.new
            )
          ),
     class="thresh")
