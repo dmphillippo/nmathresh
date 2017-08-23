@@ -290,8 +290,7 @@ nma_thresh <- function(mean.dk, lhood, post,
 
   if (opt.max){
     kstar <- order(c(0, mean.dk.subNA), decreasing=TRUE)[trt.rank]
-  }
-  else if (!opt.max){
+  } else if (!opt.max){
     kstar <- order(c(0, mean.dk.subNA), decreasing=FALSE)[trt.rank]
   }
 
@@ -304,8 +303,7 @@ nma_thresh <- function(mean.dk, lhood, post,
   # And these contrasts have non-zero elements in the contrast design matrix D
   if (kstar > 1) {
     contr.kstar <- which(D[,kstar-1] != 0)
-  }
-  else {
+  } else {
     contr.kstar <- 1:(K-1)
   }
 
