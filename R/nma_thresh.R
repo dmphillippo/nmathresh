@@ -273,7 +273,12 @@ nma_thresh <- function(mean.dk, lhood, post,
 
 ## Derive solution matrix U -------------------------------------------------
 
-  threshmat <- sweep(1 / (D %*% inflmat),1, -contr - mcid.new, "*")
+  threshmat <- sweep(1 / (D %*% inflmat), 1, -contr - sign(contr)*mcid.new, "*")
+
+  # Note: For mcid.new > 0, if a contrast is negative, we want a new decision
+  # when the contrast is > +mcid.new. If a contrast is positive, we want a new
+  # decision when the contrast is < -mcid.new. In other words, the contrast has
+  # to be overturned by an extra mcid.new amount.
 
   # Now we only need to look at contrasts involving the optimal treatment k*
   # Updated to handle trt.rank, to pick out other ranked treatments than the
