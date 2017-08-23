@@ -28,6 +28,9 @@
 #' @param trt.sub Only look at thresholds in this subset of treatments in
 #'   trt.code, e.g. if some are excluded from the ranking. Default is equivalent
 #'   to 1:K.
+#' @param mcid.new Consider changing the decision to an alternative treatment
+#'   only when it is more effective than the base-case optimal treatment by this
+#'   minimal clinically important difference. Defaults to 0.
 #'
 #' @details This function provides bias-adjustment threshold analysis for both
 #'   fixed and random effects NMA models, as described by Phillippo \emph{et
@@ -113,7 +116,8 @@ nma_thresh <- function(mean.dk, lhood, post,
                        nmatype="fixed",
                        X=NULL,
                        mu.design=NULL, delta.design=diag(nrow=dim(lhood)),
-                       opt.max=TRUE, trt.rank=1, trt.code=NULL, trt.sub=NULL) {
+                       opt.max=TRUE, trt.rank=1, trt.code=NULL, trt.sub=NULL,
+                       mcid.new=0) {
 
 
 ## Basic parameter checks --------------------------------------------------
@@ -183,7 +187,7 @@ nma_thresh <- function(mean.dk, lhood, post,
   if (is.null(trt.code)) {
     trt.code <- 1:K
   }
-  else if(length(trt.code) != K) stop("trt.code should be of length K.")
+  else if (length(trt.code) != K) stop("trt.code should be of length K.")
   else {
     message("Using recoded treatments. Reference treatment is ", trt.code[1],
         ". Parameter vector is:\n",
@@ -194,7 +198,7 @@ nma_thresh <- function(mean.dk, lhood, post,
   # Treatment subset
   if (is.null(trt.sub)){
     trt.sub <- trt.code
-  } else if(length(trt.sub)>K) stop("Length of trt.sub should be <= K.")
+  } else if (length(trt.sub)>K) stop("Length of trt.sub should be <= K.")
   else {
     message("Deriving thresholds on a subset of treatments:")
     message("\t", paste(trt.sub, collapse=", "))
@@ -203,8 +207,13 @@ nma_thresh <- function(mean.dk, lhood, post,
   trt.sub.internal <- which(trt.code %in% trt.sub)
 
   # Error if trt.rank > length(trt.sub)
-  if(trt.rank > length(trt.sub)) {
+  if (trt.rank > length(trt.sub)) {
     stop("trt.rank is larger than the length of trt.sub")
+  }
+
+  # mcid.new should be a single non-negative numeric value
+  if (!is.numeric(mcid.new) | length(mcid.new) != 1 | mcid.new < 0) {
+    stop("mcid.new should be a single non-negative numeric value")
   }
 
 
@@ -264,7 +273,12 @@ nma_thresh <- function(mean.dk, lhood, post,
 
 ## Derive solution matrix U -------------------------------------------------
 
-  threshmat <- sweep(1 / (D %*% inflmat),1, -contr, "*")
+  threshmat <- sweep(1 / (D %*% inflmat), 1, -contr - sign(contr)*mcid.new, "*")
+
+  # Note: For mcid.new > 0, if a contrast is negative, we want a new decision
+  # when the contrast is > +mcid.new. If a contrast is positive, we want a new
+  # decision when the contrast is < -mcid.new. In other words, the contrast has
+  # to be overturned by an extra mcid.new amount.
 
   # Now we only need to look at contrasts involving the optimal treatment k*
   # Updated to handle trt.rank, to pick out other ranked treatments than the
@@ -276,8 +290,7 @@ nma_thresh <- function(mean.dk, lhood, post,
 
   if (opt.max){
     kstar <- order(c(0, mean.dk.subNA), decreasing=TRUE)[trt.rank]
-  }
-  else if (!opt.max){
+  } else if (!opt.max){
     kstar <- order(c(0, mean.dk.subNA), decreasing=FALSE)[trt.rank]
   }
 
@@ -290,8 +303,7 @@ nma_thresh <- function(mean.dk, lhood, post,
   # And these contrasts have non-zero elements in the contrast design matrix D
   if (kstar > 1) {
     contr.kstar <- which(D[,kstar-1] != 0)
-  }
-  else {
+  } else {
     contr.kstar <- 1:(K-1)
   }
 
@@ -332,7 +344,8 @@ nma_thresh <- function(mean.dk, lhood, post,
            opt.max = opt.max,
            trt.rank = trt.rank,
            trt.code = trt.code,
-           trt.sub = trt.sub
+           trt.sub = trt.sub,
+           mcid.new = mcid.new
            )
          ),
     class="thresh")
