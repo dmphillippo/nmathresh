@@ -6,7 +6,8 @@
 \usage{
 nma_thresh(mean.dk, lhood, post, nmatype = "fixed", X = NULL,
   mu.design = NULL, delta.design = diag(nrow = dim(lhood)),
-  opt.max = TRUE, trt.rank = 1, trt.code = NULL, trt.sub = NULL)
+  opt.max = TRUE, trt.rank = 1, trt.code = NULL, trt.sub = NULL,
+  mcid.new = 0)
 }
 \arguments{
 \item{mean.dk}{Posterior means of basic treatment parameters \eqn{d_k}.}
