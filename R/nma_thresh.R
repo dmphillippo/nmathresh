@@ -28,6 +28,9 @@
 #' @param trt.sub Only look at thresholds in this subset of treatments in
 #'   trt.code, e.g. if some are excluded from the ranking. Default is equivalent
 #'   to 1:K.
+#' @param mcid.new Consider changing the decision to an alternative treatment
+#'   only when it is more effective than the base-case optimal treatment by this
+#'   minimal clinically important difference. Defaults to 0.
 #'
 #' @details This function provides bias-adjustment threshold analysis for both
 #'   fixed and random effects NMA models, as described by Phillippo \emph{et

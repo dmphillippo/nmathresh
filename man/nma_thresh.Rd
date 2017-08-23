@@ -40,6 +40,10 @@ equivalent to 1:K.}
 \item{trt.sub}{Only look at thresholds in this subset of treatments in
 trt.code, e.g. if some are excluded from the ranking. Default is equivalent
 to 1:K.}
+
+\item{mcid.new}{Consider changing the decision to an alternative treatment
+only when it is more effective than the base-case optimal treatment by this
+minimal clinically important difference. Defaults to 0.}
 }
 \value{
 An object of class \code{thresh}.
