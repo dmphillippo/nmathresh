@@ -273,7 +273,7 @@ nma_thresh <- function(mean.dk, lhood, post,
 
 ## Derive solution matrix U -------------------------------------------------
 
-  threshmat <- sweep(1 / (D %*% inflmat),1, -contr, "*")
+  threshmat <- sweep(1 / (D %*% inflmat),1, -contr - mcid.new, "*")
 
   # Now we only need to look at contrasts involving the optimal treatment k*
   # Updated to handle trt.rank, to pick out other ranked treatments than the
