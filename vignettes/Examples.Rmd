@@ -594,7 +594,7 @@ Mayo-Wilson E, Dias S, Mavranezouli I, Kew K, Clark DM, Ades AE, et al. Psycholo
 
 National Collaborating Centre for Mental Health. Social Anxiety Disorder: Recognition, Assessment and Treatment. Leicester and London: The British Psychological Society and the Royal College of Psychiatrists; 2013.
 
-Phillippo DM, Welton NJ, Dias S, Didelez V, Ades AE. Quantifying the effects of bias: deriving bias adjustment thresholds for Bayesian network meta-analysis. Under review.
+Phillippo DM, Dias S, Ades AE, Didelez V, Welton NJ. Sensitivity of treatment recommendations to bias in Network Meta-Analysis. Under review.
 
 
 # Appendix: WinBUGS code and reading CODA output
