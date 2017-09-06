@@ -1,7 +1,7 @@
 Package: nmathresh
 Type: Package
 Title: Thresholds and invariant intervals for Network Meta-Analysis
-Version: 0.0.2
+Version: 0.0.3
 Authors@R: person("David", "Phillippo", email="david.phillippo@bristol.ac.uk", role=c("aut","cre"))
 Description: This package provides functions to calculate decision-invariant
     bias-adjustment thresholds and intervals for a Bayesian Network Meta-Analysis,
