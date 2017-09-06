@@ -295,19 +295,15 @@ thresh_forest <- function(thresh,
                            t = 1, b = 1, l = 1, r = Ntabcols
                            )
 
-  # Add in rows of forest plot to the table one at a time
+  # Add in rows of forest plot to the table
   g_all <- gtable_add_cols(g_tab, unit(1, "null"))
 
-  for (i in 1:Nrows) {
-    # Create forest plot row as grob
-    g_for <- with(pd[i, ], forestgrob(y, CI.lo, CI.hi, II.lo, II.hi,
-                                      xlim, CI.lwd, II.cols, II.colw, II.lwd, pointsize)
-                  )
+  g_for <- mapply(forestgrob,
+                  pd$y, pd$CI.lo, pd$CI.hi, pd$II.lo, pd$II.hi,
+                  MoreArgs = list(xlim, CI.lwd, II.cols, II.colw, II.lwd, pointsize),
+                  SIMPLIFY = FALSE)
 
-    # Add forest plot row into table
-    g_all <- gtable_add_grob(g_all, g_for, t = i+1, l = Ntabcols+1, z = 100)
-  }
-
+  g_all <- gtable_add_grob(g_all, g_for, t = 2:(Nrows+1), l = Ntabcols+1, z = 100)
 
   # Add reference line
     if (!is.null(refline)) {
