@@ -29,4 +29,3 @@ Mayo-Wilson E, Dias S, Mavranezouli I, Kew K, Clark DM, Ades AE,
 \code{\link{SocAnx.post.summary}}
 }
 \keyword{datasets}
-

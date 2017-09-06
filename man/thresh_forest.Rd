@@ -6,10 +6,11 @@
 \usage{
 thresh_forest(thresh, y, CI.lo, CI.hi, label, orderby = NULL, data = NULL,
   CI.title = "95\% Confidence Interval", label.title = "",
-  y.title = "Mean", xlab = "", xlim = NULL, sigfig = 3, digits = NULL,
-  refline = NULL, clinsig = NULL, cutoff = NULL, II.colw = rgb(0.72,
-  0.8, 0.93), II.cols = rgb(0.93, 0.72, 0.8), II.lwd = 8, CI.lwd = 1,
-  pointsize = 4, fontsize = 12, xbreaks = NULL, calcdim = TRUE)
+  y.title = "Mean", II.title = "Invariant Interval", xlab = "",
+  xlim = NULL, sigfig = 3, digits = NULL, refline = NULL,
+  clinsig = NULL, cutoff = NULL, II.colw = rgb(0.72, 0.8, 0.93),
+  II.cols = rgb(0.93, 0.72, 0.8), II.lwd = 8, CI.lwd = 1, pointsize = 4,
+  fontsize = 12, xbreaks = NULL, calcdim = display, display = TRUE)
 }
 \arguments{
 \item{thresh}{A \code{thresh} object, as produced by
@@ -37,7 +38,7 @@ confidence/credible intervals (\code{CI.lo}, \code{CI.hi}), and row labels
 \code{labels}. If \code{data} is not provided, the above variables will be
 searched for in the calling environment.}
 
-\item{CI.title}{Title for CI column, default "95\% Credible Interval".}
+\item{CI.title}{Title for CI column, default "95\% Confidence Interval".}
 
 \item{label.title}{Character string giving the heading for the row labels
 column.}
@@ -45,10 +46,13 @@ column.}
 \item{y.title}{Character string giving the heading for the data points
 column, default "Mean".}
 
-\item{xlab}{Character string giving the label for the x-axis.}
+\item{II.title}{Title for invariant interval column, default "Invariant
+Interval".}
+
+\item{xlab}{Character string giving the label for the \eqn{x}-axis.}
 
 \item{xlim}{Numeric vector (length 2) of lower and upper limits for the
-x-axis. If not set, tries to choose a sensible default.}
+\eqn{x}-axis. If not set, tries to choose a sensible default.}
 
 \item{sigfig}{Number of significant digits to display in the table. Default
 3.}
@@ -78,15 +82,18 @@ be cut off and marked as NT (no threshold). Not set by default.}
 
 \item{fontsize}{Base font size. Default 12.}
 
-\item{xbreaks}{Position of tick marks on the x-axis as a numeric vector.}
+\item{xbreaks}{Position of tick marks on the \eqn{x}-axis as a numeric
+vector.}
 
 \item{calcdim}{Logical, calculate suggested output dimensions for saving to
 pdf? Calculates output size when \code{TRUE}; saves time when \code{FALSE}.}
+
+\item{display}{Logical, display the plot? Defaults to \code{TRUE}.}
 }
 \value{
-Displays the forest plot on the current plot device. Also returns
-  invisibly the underlying \code{gtable} object, which could be further
-  manipulated.
+Displays the forest plot on the current plot device (if \code{display
+  = TRUE}). Also returns invisibly the underlying \code{gtable} object, which
+  can be further manipulated.
 }
 \description{
 This function produces threshold forest plots, overlaying the
@@ -146,4 +153,3 @@ thresh_forest(thresh, contr.mean, CI2.5, CI97.5, label = lab, data = plotdat,
               xlim = c(-.3, .3), refline = 0, digits = 2)
 
 }
-

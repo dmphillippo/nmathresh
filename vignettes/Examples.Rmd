@@ -156,56 +156,13 @@ The lower portion of the invariant interval is shaded red (and the row label is 
 The threshold analysis highlights that the decision is sensitive to bias adjustments in several studies (particularly 34, 35, and 11), but also shows a robustness to bias adjustments in many other studies with wide invariant intervals.
 
 ### Thresholds for multiple biases
-Continuing at study level, we can consider thresholds for multiple bias adjustments simultaneously. Here, we shall derive thresholds for simultaneous bias adjustments to the two contrasts of the 3-arm study 1.
-```{r}
-# Row numbers of data points in dataset (dat.rawl)
-m1 <- 1  # This point will be adjusted on the x-axis
-m2 <- 2  # This point will be adjusted on the y-axis
-```
-
-The threshold lines can be derived directly from the set of values $u_{ak^*,m}$, which is provided in matrix form by the output of `nma_thresh` in `$Ukstar`.
-```{r}
-# Line data
-linedat <- data.frame(intercept = thresh$Ukstar[,m2],
-                      gradient = - thresh$Ukstar[,m2] / thresh$Ukstar[,m1])
-```
-
-Now we construct the plot. At present this is a largely manual process, which requires a little trial and error to determine which threshold lines intersect to make up the invariant region, and to appropriately locate labels.
+Continuing at study level, we can consider thresholds for multiple bias adjustments simultaneously. Here, we shall derive thresholds for simultaneous bias adjustments to the two contrasts of the 3-arm study 1, which are data points 1 and 2 in the dataset. The threshold lines can be derived directly from the set of values $u_{ak^*,m}$, which is provided in matrix form by the output of `nma_thresh` in `$Ukstar`. It is straightforward to calculate the gradient `- thresh$Ukstar[,2] / thresh$Ukstar[,1]` and intercept `thresh$Ukstar[,2]` of every threshold line, however it is rather tedious to construct the plot by hand. The function `thresh_2d` does all the hard work for us, taking the threshold object `thresh` and the row numbers of the datapoints to consider as its main arguments:
 ```{r, fig.width=6, fig.height=6, out.width='60%', dpi=300}
-# Function to get intercept values of two lines
-get.intercept <- function(line1, line2){
-  if(all(line1==line2)) return(c(NA,NA))
-  
-  x <- (line2$intercept - line1$intercept) / (line1$gradient - line2$gradient)
-  y <- line1$gradient * x + line1$intercept
-  return(data.frame(x=x,y=y))
-}
-
-# Invariant region data
-irdat <- rbind(get.intercept(linedat[4 -1,], linedat[6 -1,]),
-               get.intercept(linedat[6 -1,], linedat[5 -1,]),
-               get.intercept(linedat[5 -1,], linedat[4 -1,]))
-
-# Label data
-labdat <- data.frame(
-  x = c(-0.8, 0.03, -0.5),
-  y = c(6.7, 9.5, -1.2),
-  lab = paste0("paste(tilde(k),'* = ',", c(6, 5, 4),")")
-)
-
-library(ggplot2)
-ggplot() +
-  geom_hline(yintercept=0, linetype=2, colour="grey40") +
-  geom_vline(xintercept=0, linetype=2, colour="grey40") +
-  geom_abline(aes(intercept=intercept, slope=gradient), data=linedat, colour="grey60") +
-  geom_polygon(aes(x=x, y=y), data=irdat, 
-               fill=rgb(.72, .80, .93, .7), colour="black") +
-  geom_label(aes(x=x, y=y, label=lab), data=labdat, parse=TRUE) +
-  xlab("Adjustment in Study 1 LOR: 3 vs. 1") +
-  ylab("Adjustment in Study 1 LOR: 4 vs. 1") +
-  coord_cartesian(xlim=c(-1.5,0.5), ylim=c(-1.5,14)) +
-  scale_y_continuous(breaks=seq(-2, 14, 2)) +
-  theme_bw() + theme(panel.grid = element_blank())
+thresh_2d(thresh, 1, 2,
+          xlab = "Adjustment in Study 1 LOR: 3 vs. 1",
+          ylab = "Adjustment in Study 1 LOR: 4 vs. 1",
+          xlim = c(-1.5, 0.5), ylim = c(-2, 14),
+          ybreaks = seq(-2, 14, 2))
 ```
 
 We can see that, rather than requiring a single very large positive bias adjustment of 5.277 in the log OR of treatment 4 vs. 1 was needed to to change the optimal treatment to 5, two much smaller bias adjustments of 0.144 to the 3 vs. 1 log OR and 0.021 to the 4 vs. 1 log OR are also capable of crossing the invariant threshold to make treatment 5 optimal.
@@ -608,53 +565,21 @@ plotII(thresh.psych,
 For a more detailed explanation and interpretation of these forest plots see Phillippo et al. (under review). The magnitude of the thresholds for both common pharmacological and common psychological treatment biases are large (Cohen, 1988). Any such biases - if they exist - are likely to be much smaller than these thresholds.
 
 We may also assess the impact of adjusting for common biases of this nature simultaneously. Again, this is done by manipulating the set of $u_{ak^*,m}$ values to derive threshold lines (the boundaries where treatment $a$ replaces treatment $k^*$ as optimal). With adjustment for common pharmacological treatment bias on the $x$-axis and adjustment for common psychological treatment bias on the $y$-axis, the $y$ intercept of each line is the sum of all $u_{ak^*,m}$ values over the psychological data points (i.e. the one-dimensional threshold solutions). Similarly, the $x$ intercept of each line is the sum of all $u_{ak^*,m}$ values over the pharmacological data points.
-```{r}
-# Line data
-linedat <- data.frame(intercept = U.psych,
-                      gradient = - U.psych / U.drugs)
-```
 
-Now that we have the line data, we must pick out the lines which make up the invariant region manually with some trial and error. Labels are also placed manually.
-```{r, eval=FALSE}
-library(ggplot2)
-```
+Instead of deriving the threshold lines by hand using `U.drugs` and `U.psych`, we will assemble a bare-bones `thresh` object for input to `thresh_2d`, to take advantage of the automated plotting routines. The `Ukstar` matrix has a column for the threshold solutions for the combined drug data points `U.drugs`, and a column for threshold solutions for the combined psychological data points `U.psych`. `thresh_2d` also uses `kstar`, so we include that too. Internally, `thresh_2d` uses the `Ukstar` matrix to derive the threshold lines with gradient `- U.psych / U.drugs` and intercept `U.psych`.
 ```{r, fig.width=8, fig.height=8, out.width='80%', dpi=300}
-# Function to get intercept values of two lines
-get.intercept <- function(line1, line2){
-  if(all(line1==line2)) return(c(NA,NA))
-
-  x <- (line2$intercept - line1$intercept) / (line1$gradient - line2$gradient)
-  y <- line1$gradient * x + line1$intercept
-  return(data.frame(x=x,y=y))
-}
-
-# Invariant region data
-irdat <- rbind(get.intercept(linedat[36,], linedat[2,]),
-              get.intercept(linedat[2,], linedat[3,]),
-              get.intercept(linedat[3,], linedat[39,]),
-              get.intercept(linedat[39,], linedat[14,]),
-              get.intercept(linedat[14,], linedat[36,]))
-
-# Label data
-labdat <- data.frame(
-  x = c(-2.1, 0.35, 1.8, -1.1, -4.5),
-  y = c(0.7, 1.7, 0.84, -2.3, -3),
-  lab = paste0("paste(tilde(k),'* = ',", c(39, 3, 2, 36, 14),")")
+thresh.drugpsych <- list(
+  Ukstar = cbind(U.drugs, U.psych),
+  kstar = thresh$kstar
 )
 
-# Plot
-ggplot() +
-  geom_hline(yintercept=0, linetype=2, colour="grey40") +
-  geom_vline(xintercept=0, linetype=2, colour="grey40") +
-  geom_abline(aes(intercept=intercept, slope=gradient), data=linedat, colour="grey60") +
-  geom_polygon(aes(x=x, y=y), data=irdat, 
-               fill=rgb(.72, .80, .93, .7), colour="black") +
-  geom_label(aes(x=x, y=y, label=lab), data=labdat, parse=TRUE) +
-  scale_x_continuous("SMD adjustment: Drug vs. Inactive", breaks=-6:2) +
-  scale_y_continuous("SMD adjustment: Psych vs. Inactive", breaks=-6:2) +
-  coord_cartesian(xlim=c(-6,2), ylim=c(-6,2)) +
-  theme_bw() + theme(panel.grid = element_blank())
+thresh_2d(thresh.drugpsych, 1, 2,
+          xlab = "SMD adjustment: Drug vs. Inactive",
+          ylab = "SMD adjustment: Psych vs. Inactive",
+          xlim = c(-6, 2), ylim = c(-6, 2),
+          breaks = -6:2)
 ```
+
 
 # References
 Boland A, Dundar Y, Bagust A, Haycox A, Hill R, Mujica Mota R, et al. Early thrombolysis for the treatment of acute myocardial infarction: a systematic review and economic evaluation. Health technology assessment 2003;7:1-136. 

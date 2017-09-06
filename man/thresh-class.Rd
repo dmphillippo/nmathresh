@@ -42,4 +42,3 @@ Objects of class \code{thresh} have the following components:
 \seealso{
 \code{\link{nma_thresh}}
 }
-

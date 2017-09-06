@@ -17,17 +17,20 @@
 #' @param mu.design [RE models only] Design matrix for any extra parameters.
 #'   Defaults to NULL (no extra parameters).
 #' @param delta.design [RE models only] Design matrix for delta, defaults to the
-#'   NxN identity matrix.
+#'   \eqn{N \times N}{N x N} identity matrix.
 #' @param opt.max Should the optimal decision be the maximal treatment effect
 #'   (TRUE, default) or the minimum (FALSE).
 #' @param trt.rank Rank of the treatment to derive thresholds for. Defaults to
 #'   1, thresholds for the optimum treatment.
 #' @param trt.code Treatment codings of the reference trt and in the parameter
-#'   vector d_k. Use if treatments re-labelled or re-ordered. Default is
+#'   vector \eqn{d_k}. Use if treatments re-labelled or re-ordered. Default is
 #'   equivalent to 1:K.
 #' @param trt.sub Only look at thresholds in this subset of treatments in
 #'   trt.code, e.g. if some are excluded from the ranking. Default is equivalent
 #'   to 1:K.
+#' @param mcid.new Consider changing the decision to an alternative treatment
+#'   only when it is more effective than the base-case optimal treatment by this
+#'   minimal clinically important difference. Defaults to 0.
 #'
 #' @details This function provides bias-adjustment threshold analysis for both
 #'   fixed and random effects NMA models, as described by Phillippo \emph{et
@@ -50,9 +53,10 @@
 #' @section Model details: \strong{The FE NMA model}
 #'
 #'   The fixed effects NMA model is assumed to be of the form \describe{
-#'   \item{Prior:}{\eqn{d \sim \mathrm{N} ( d_0, \Sigma_d )}}
-#'   \item{Likelihood:}{\eqn{y|d \sim \mathrm{N} ( \delta, V )}} \item{FE
-#'   model:}{\eqn{\delta = Xd + M\mu}} }
+#'   \item{Prior:}{\eqn{d \sim \mathrm{N} ( d_0, \Sigma_d )}{d ~ N(d_0,
+#'   \Sigma_d)}}
+#'   \item{Likelihood:}{\eqn{y|d \sim \mathrm{N} ( \delta, V )}{y|d ~ N(\delta,
+#'   V)}} \item{FE model:}{\eqn{\delta = Xd + M\mu}} }
 #'
 #'   The additional parameters \eqn{\mu} may be given any sensible prior; they
 #'   do not affect the threshold analysis in any way.
@@ -61,9 +65,12 @@
 #'
 #'   The random effects NMA model is assumed to be of the form \describe{
 #'   \item{Priors:}{\eqn{ d \sim \mathrm{N} ( d_0, \Sigma_d ), \quad \mu \sim
-#'   \mathrm{N} ( \mu_0, \Sigma_\mu )}} \item{Likelihood:}{\eqn{y|d,\mu,\tau^2
-#'   \sim \mathrm{N} ( L\delta + M\mu, V )}} \item{RE model:}{\eqn{\delta \sim
-#'   \mathrm{N} ( Xd, \tau^2 )}} }
+#'   \mathrm{N} ( \mu_0, \Sigma_\mu )}{d ~ N(d_0, \Sigma_d), \mu ~ N(\mu_0,
+#'   \Sigma_\mu)}}
+#'   \item{Likelihood:}{\eqn{y|d,\mu,\tau^2 \sim \mathrm{N} ( L\delta + M\mu, V
+#'   )}{y|d,\mu,\tau^2 ~ N(L\delta + M\mu, V)}}
+#'   \item{RE model:}{\eqn{\delta \sim \mathrm{N} ( Xd, \tau^2 )}{\delta ~ N(Xd,
+#'   \tau^2)}} }
 #'
 #'   The between-study heterogeneity parameter \eqn{\tau^2} may be given any
 #'   sensible prior. In the RE case, the threshold derivations make the
@@ -109,7 +116,8 @@ nma_thresh <- function(mean.dk, lhood, post,
                        nmatype="fixed",
                        X=NULL,
                        mu.design=NULL, delta.design=diag(nrow=dim(lhood)),
-                       opt.max=TRUE, trt.rank=1, trt.code=NULL, trt.sub=NULL) {
+                       opt.max=TRUE, trt.rank=1, trt.code=NULL, trt.sub=NULL,
+                       mcid.new=0) {
 
 
 ## Basic parameter checks --------------------------------------------------
@@ -179,7 +187,7 @@ nma_thresh <- function(mean.dk, lhood, post,
   if (is.null(trt.code)) {
     trt.code <- 1:K
   }
-  else if(length(trt.code) != K) stop("trt.code should be of length K.")
+  else if (length(trt.code) != K) stop("trt.code should be of length K.")
   else {
     message("Using recoded treatments. Reference treatment is ", trt.code[1],
         ". Parameter vector is:\n",
@@ -190,7 +198,7 @@ nma_thresh <- function(mean.dk, lhood, post,
   # Treatment subset
   if (is.null(trt.sub)){
     trt.sub <- trt.code
-  } else if(length(trt.sub)>K) stop("Length of trt.sub should be <= K.")
+  } else if (length(trt.sub)>K) stop("Length of trt.sub should be <= K.")
   else {
     message("Deriving thresholds on a subset of treatments:")
     message("\t", paste(trt.sub, collapse=", "))
@@ -199,8 +207,13 @@ nma_thresh <- function(mean.dk, lhood, post,
   trt.sub.internal <- which(trt.code %in% trt.sub)
 
   # Error if trt.rank > length(trt.sub)
-  if(trt.rank > length(trt.sub)) {
+  if (trt.rank > length(trt.sub)) {
     stop("trt.rank is larger than the length of trt.sub")
+  }
+
+  # mcid.new should be a single non-negative numeric value
+  if (!is.numeric(mcid.new) | length(mcid.new) != 1 | mcid.new < 0) {
+    stop("mcid.new should be a single non-negative numeric value")
   }
 
 
@@ -260,7 +273,12 @@ nma_thresh <- function(mean.dk, lhood, post,
 
 ## Derive solution matrix U -------------------------------------------------
 
-  threshmat <- sweep(1 / (D %*% inflmat),1, -contr, "*")
+  threshmat <- sweep(1 / (D %*% inflmat), 1, -contr - sign(contr)*mcid.new, "*")
+
+  # Note: For mcid.new > 0, if a contrast is negative, we want a new decision
+  # when the contrast is > +mcid.new. If a contrast is positive, we want a new
+  # decision when the contrast is < -mcid.new. In other words, the contrast has
+  # to be overturned by an extra mcid.new amount.
 
   # Now we only need to look at contrasts involving the optimal treatment k*
   # Updated to handle trt.rank, to pick out other ranked treatments than the
@@ -272,8 +290,7 @@ nma_thresh <- function(mean.dk, lhood, post,
 
   if (opt.max){
     kstar <- order(c(0, mean.dk.subNA), decreasing=TRUE)[trt.rank]
-  }
-  else if (!opt.max){
+  } else if (!opt.max){
     kstar <- order(c(0, mean.dk.subNA), decreasing=FALSE)[trt.rank]
   }
 
@@ -286,8 +303,7 @@ nma_thresh <- function(mean.dk, lhood, post,
   # And these contrasts have non-zero elements in the contrast design matrix D
   if (kstar > 1) {
     contr.kstar <- which(D[,kstar-1] != 0)
-  }
-  else {
+  } else {
     contr.kstar <- 1:(K-1)
   }
 
@@ -301,25 +317,13 @@ nma_thresh <- function(mean.dk, lhood, post,
   contr.trt.sub <- trt.sub.internal[-which(trt.sub.internal == kstar)] -
     (trt.sub.internal[-which(trt.sub.internal == kstar)] >= kstar)*1
 
-  # Fix for when using trt.sub to only pick out two treatments, threshmat.kstar is then only
-  # one row which apply doesn't like
-  if(grepl("matrix",class(threshmat.kstar[contr.trt.sub,]), ignore.case=T)){
     thresholds <- as.data.frame(
       do.call(rbind,
-              apply(threshmat.kstar[contr.trt.sub,], 2,
+              apply(threshmat.kstar[contr.trt.sub, , drop = FALSE], 2,
                     get.int, kstar, trt.code, trt.sub
                     )
               )
       )
-  } else {
-    thresholds <- as.data.frame(
-      do.call(rbind,
-              apply(t(as.matrix(threshmat.kstar[contr.trt.sub,])), 2,
-                    get.int, kstar, trt.code, trt.sub
-                    )
-              )
-      )
-  }
 
 
 ## Return thresh object ----------------------------------------------------
@@ -340,7 +344,8 @@ nma_thresh <- function(mean.dk, lhood, post,
            opt.max = opt.max,
            trt.rank = trt.rank,
            trt.code = trt.code,
-           trt.sub = trt.sub
+           trt.sub = trt.sub,
+           mcid.new = mcid.new
            )
          ),
     class="thresh")

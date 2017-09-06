@@ -22,14 +22,16 @@
 #'   confidence/credible intervals (\code{CI.lo}, \code{CI.hi}), and row labels
 #'   \code{labels}. If \code{data} is not provided, the above variables will be
 #'   searched for in the calling environment.
-#' @param CI.title Title for CI column, default "95\% Credible Interval".
+#' @param CI.title Title for CI column, default "95\% Confidence Interval".
 #' @param label.title Character string giving the heading for the row labels
 #'   column.
 #' @param y.title Character string giving the heading for the data points
 #'   column, default "Mean".
-#' @param xlab Character string giving the label for the x-axis.
+#' @param II.title Title for invariant interval column, default "Invariant
+#'   Interval".
+#' @param xlab Character string giving the label for the \eqn{x}-axis.
 #' @param xlim Numeric vector (length 2) of lower and upper limits for the
-#'   x-axis. If not set, tries to choose a sensible default.
+#'   \eqn{x}-axis. If not set, tries to choose a sensible default.
 #' @param sigfig Number of significant digits to display in the table. Default
 #'   3.
 #' @param digits Number of decimal places to display in the table. Overrides
@@ -47,13 +49,15 @@
 #' @param CI.lwd Line width of confidence/credible intervals. Default 1.
 #' @param pointsize Point size for forest plot means. Default 4.
 #' @param fontsize Base font size. Default 12.
-#' @param xbreaks Position of tick marks on the x-axis as a numeric vector.
+#' @param xbreaks Position of tick marks on the \eqn{x}-axis as a numeric
+#'   vector.
 #' @param calcdim Logical, calculate suggested output dimensions for saving to
 #'   pdf? Calculates output size when \code{TRUE}; saves time when \code{FALSE}.
+#' @param display Logical, display the plot? Defaults to \code{TRUE}.
 #'
-#' @return Displays the forest plot on the current plot device. Also returns
-#'   invisibly the underlying \code{gtable} object, which could be further
-#'   manipulated.
+#' @return Displays the forest plot on the current plot device (if \code{display
+#'   = TRUE}). Also returns invisibly the underlying \code{gtable} object, which
+#'   can be further manipulated.
 #' @export
 #'
 #' @import gtable grid gridExtra grDevices
@@ -114,14 +118,15 @@
 thresh_forest <- function(thresh,
                          y, CI.lo, CI.hi, label, orderby = NULL, data = NULL,
                          CI.title = "95% Confidence Interval",
-                         label.title = "", y.title = "Mean", xlab = "",
+                         label.title = "", y.title = "Mean",
+                         II.title = "Invariant Interval", xlab = "",
                          xlim = NULL, sigfig = 3, digits = NULL,
                          refline = NULL, clinsig = NULL, cutoff = NULL,
                          II.colw = rgb(.72, .80, .93),
                          II.cols = rgb(.93, .72, .80),
                          II.lwd = 8, CI.lwd = 1,
                          pointsize = 4, fontsize = 12,
-                         xbreaks = NULL, calcdim = TRUE){
+                         xbreaks = NULL, calcdim = display, display = TRUE){
 
   # Evaluate data arguments
   y <- eval(substitute(y), data, parent.frame())
@@ -224,16 +229,19 @@ thresh_forest <- function(thresh,
   # na.last = NA.)
   Nrows <- nrow(pd)
 
+  # Make expression II.title bold
+  if(is.expression(II.title)) II.title <- eval(bquote(expression(bold(.(II.title[[1]])))))
+
   # Arrange table
   g_tab <- tableGrob(
     d = pd[, c("lab.clinshort", "label", "y.txt", "CI.txt",
             "lo.newkstar.txt", "II.txt", "hi.newkstar.txt")],
     rows = NULL,
-    cols = c("", label.title, y.title, CI.title, "", "Invariant Interval", ""),
+    cols = c("", label.title, y.title, CI.title, "", "", ""),
     theme = gridExtra::ttheme_minimal(
       base_size = fontsize,
       core = list(fg_params = list(
-        hjust = rep(c(0, 0,.5, .5, 1,.5, 1), each = Nrows),
+        hjust = rep(c(0, 0, 0, .5, 1,.5, 1), each = Nrows),
         x = rep(c(.6, 0,.5, .5, .5, .5, .5), each = Nrows),
         fontface = c(rep("plain", Nrows), pd$lab.ff, rep("plain", Nrows*5)),
         vjust = rep(c(1, .5, .5, .5, .5, .5, .5), each = Nrows),
@@ -241,12 +249,41 @@ thresh_forest <- function(thresh,
         )),
       colhead = list(fg_params = list(
         hjust = c(0, 0,.5, .5, 1,.5, 1),
-        x = c(0, 0,.5, .5, .5, .5, .5)
+        vjust = c(0, 0, 0, 0, 0, 0, 0),
+        x = c(0, 0,.5, .5, .5, .5, .5),
+        y = c(.25, .25, .25, .25, .25, .25, .25)
         ))
       )
     )
 
-  Ntabcols <- 7   # set number of table columns
+  # Add II header separately, so that it spans the newkstar columns as well
+  II.title.grob <- textGrob(label = II.title,
+                            y = 0.25, hjust = 0.5, vjust = 0,
+                            gp = g_tab$grobs[[4]]$gp)  # Copy gp from CI column header
+  g_tab <- gtable_add_grob(g_tab,
+                           grobs = II.title.grob,
+                           t = 1, b = 1, l = 5, r = 7)
+
+  # If II header is really long, add extra width to either side of newkstar columns
+  extrawidth <- max(unit(1, "grobwidth", II.title.grob) -
+                      sum(g_tab$widths[[5]], g_tab$widths[[6]], g_tab$widths[[7]]),
+                    unit(0, "mm")) * 0.5
+
+  g_tab$widths[[5]] <- g_tab$widths[[5]] + extrawidth
+  g_tab$widths[[7]] <- g_tab$widths[[7]] + extrawidth
+
+  # Align the mean column at the decimal point
+  # Get string widths to left of dp
+  y.strwd <- lapply(gsub("(-?[0-9]+[.]?)[0-9]+", "\\1", pd$y.txt), function(x) unit(1, "strwidth", x))
+
+  # Find grobs for mean column, update x location
+  meancol <- which(g_tab$layout$l == 3 & g_tab$layout$name == "core-fg")
+  for (i in 1:length(meancol)) {
+    g_tab$grobs[[meancol[i]]]$x <- unit(0.5, "npc") - y.strwd[[i]]
+  }
+
+  # Set number of table columns
+  Ntabcols <- 7
 
   # Header underline
   g_tab <- gtable_add_grob(g_tab,
@@ -262,7 +299,7 @@ thresh_forest <- function(thresh,
   g_all <- gtable_add_cols(g_tab, unit(1, "null"))
 
   for (i in 1:Nrows) {
-    # Create forset plot row as grob
+    # Create forest plot row as grob
     g_for <- with(pd[i, ], forestgrob(y, CI.lo, CI.hi, II.lo, II.hi,
                                       xlim, CI.lwd, II.cols, II.colw, II.lwd, pointsize)
                   )
@@ -317,8 +354,10 @@ thresh_forest <- function(thresh,
   g_all <- gtable_add_padding(g_all, unit(c(.5, 1, .5, .5), "lines"))
 
   # Plot
-  grid.newpage()
-  grid.draw(g_all)
+  if (display){
+    grid.newpage()
+    grid.draw(g_all)
+  }
 
   # Print sizes for easy saving
   if (calcdim) {
