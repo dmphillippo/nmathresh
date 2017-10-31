@@ -1,7 +1,7 @@
 #' Producing two-dimensional invariant regions
 #'
 #' This function produces two-dimensional threshold lines and invariant regions,
-#' as shown by Phillippo \emph{et al.} (2016).
+#' as shown by Phillippo \emph{et al.}
 #'
 #' @param thresh A \code{thresh} object, as produced by
 #'   \code{\link{nma_thresh}}.

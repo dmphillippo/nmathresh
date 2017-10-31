@@ -2,7 +2,7 @@
 #'
 #' This function produces threshold forest plots, overlaying the
 #' decision-invariant intervals on the data points and their confidence/credible
-#' intervals, as shown by Phillippo \emph{et al.} (under review).
+#' intervals, as shown by Phillippo \emph{et al.}
 #'
 #' @param thresh A \code{thresh} object, as produced by
 #'   \code{\link{nma_thresh}}.

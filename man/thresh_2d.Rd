@@ -53,7 +53,7 @@ A \code{ggplot} object containing the 2D threshold plot, which is
 }
 \description{
 This function produces two-dimensional threshold lines and invariant regions,
-as shown by Phillippo \emph{et al.} (2016).
+as shown by Phillippo \emph{et al.}
 }
 \examples{
 # Please see the vignette "Examples" for worked examples including use of
