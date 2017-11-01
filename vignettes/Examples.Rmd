@@ -345,7 +345,7 @@ The overall NMA results showed no evidence of a significant difference between t
 Note that bias adjustments in general may be plausible beyond the range of the confidence interval; the results should therefore be interpreted in light of the magnitude and direction of possible bias.
 
 ## Contrast level threshold analysis
-```{r}
+```{r, include = FALSE}
 # Reset environment
 rm(list=ls())
 ```
