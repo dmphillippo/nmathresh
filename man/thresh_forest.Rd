@@ -98,7 +98,7 @@ Displays the forest plot on the current plot device (if \code{display
 \description{
 This function produces threshold forest plots, overlaying the
 decision-invariant intervals on the data points and their confidence/credible
-intervals, as shown by Phillippo \emph{et al.} (under review).
+intervals, as shown by Phillippo \emph{et al.} (2017).
 }
 \examples{
 # Please see the vignette "Examples" for worked examples including use of
