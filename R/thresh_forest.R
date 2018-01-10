@@ -344,7 +344,7 @@ thresh_forest <- function(thresh,
   g_all <- gtable_add_grob(g_all, leg, t = Nrows+3, b = Nrows+3, l = 2, r = Ntabcols, z = 98)
 
   # Add padding in between table and plot
-  g_all <- gtable_add_col_space(g_all, unit(c(rep(0, Ntabcols-1), 1), "lines"))
+  g_all <- gtable_add_cols(g_all, unit(1, "lines"), Ntabcols)
 
   # Pad edges of table
   g_all <- gtable_add_padding(g_all, unit(c(.5, 1, .5, .5), "lines"))
