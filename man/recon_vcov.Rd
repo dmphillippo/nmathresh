@@ -31,7 +31,7 @@ then be used to perform a contrast-level threshold analysis with the function
 }
 \details{
 Full details of the calculation are given by Phillippo \emph{et al.}
-  (under review). Briefly, the aim is to recover the contrast-level
+  (2017). Briefly, the aim is to recover the contrast-level
   likelihood covariance matrix \eqn{V} that would have led to the posterior
   covariance matrix \eqn{\Sigma} being obtained from a fixed effects NMA,
   with design matrix \eqn{X} and prior covariance matrix \eqn{\Sigma_d} for a
