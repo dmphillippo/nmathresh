@@ -162,11 +162,24 @@ thresh_forest <- function(thresh,
     orderby <- list(orderby)
   }
 
-  # Check lengths
+  # Set up additional columns
+  add.columns <- as.data.frame(add.columns)
+
+  if (is.null(add.columns.title)) {
+    add.columns.title <- colnames(add.columns)
+  }
+  if (length(add.columns.title) != ncol(add.columns)) {
+    stop("Mismatch number of additional columns and titles")
+  }
+
+  add.columns.hjust <- rep_len(add.columns.hjust, ncol(add.columns))
+
+  # Check number of rows
   stopifnot(length(y) == N,
             length(CI.lo) == N,
             length(CI.hi) == N,
-            length(label) == N)
+            length(label) == N,
+            nrow(add.columns) == N)
 
   # Set up plot data
   pd <- cbind(data.frame(y = y, CI.lo = CI.lo, CI.hi = CI.hi, label = label),
