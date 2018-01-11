@@ -374,7 +374,7 @@ thresh_forest <- function(thresh,
   g_all <- gtable_add_grob(g_all, leg, t = Nrows+3, b = Nrows+3, l = 2, r = Ntabcols, z = 98)
 
   # Add in additional columns (if any)
-  if (add.columns.after == -1) add.columns.after <- Ntabcols+1
+  #if (add.columns.after == -1) add.columns.after <- Ntabcols+1
 
   if (!is.null(add.columns)) {
     # Format numeric columns
@@ -396,7 +396,7 @@ thresh_forest <- function(thresh,
                        ))
 
     # Underline header
-    if (add.columns.uline & add.columns.after > Ntabcols) {
+    if (add.columns.uline & (add.columns.after == -1 | add.columns.after > Ntabcols)) {
       g_add <- gtable_add_grob(g_add,
                                grobs = segmentsGrob(
                                  x0 = unit(0, "npc"), y0 = unit(0, "npc"),
@@ -419,12 +419,15 @@ thresh_forest <- function(thresh,
     }
 
     # Update Ntabcols, if necessary
-    if (add.columns.after <= Ntabcols) Ntabcols <- Ntabcols + ncol(add.columns)
+    if (add.columns.after != -1 & add.columns.after <= Ntabcols) Ntabcols <- Ntabcols + ncol(add.columns)
   }
 
   # Add padding in between table and plot
   g_all <- gtable_add_cols(g_all, unit(1, "lines"), Ntabcols)
-  if (add.columns.after > Ntabcols) g_all <- gtable_add_cols(g_all, unit(1, "lines"), Ntabcols + 2)
+
+  if (add.columns.after == -1 | add.columns.after > Ntabcols) {
+    g_all <- gtable_add_cols(g_all, unit(1, "lines"), Ntabcols + 2)
+  }
 
   # Pad edges of table
   g_all <- gtable_add_padding(g_all, unit(c(.5, 1, .5, .5), "lines"))
