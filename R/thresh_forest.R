@@ -51,6 +51,17 @@
 #' @param fontsize Base font size. Default 12.
 #' @param xbreaks Position of tick marks on the \eqn{x}-axis as a numeric
 #'   vector.
+#' @param add.columns Data frame (or matrix, vector) of additional columns to
+#'   add to table.
+#' @param add.columns.title Optional titles for the additional columns,
+#'   otherwise use names from provided data.
+#' @param add.columns.after Which column to add the new columns after? Default
+#'   adds the columns to the far right.
+#' @param add.columns.hjust Vector of horizontal justifications for the new
+#'   columns, from \code{0} (left) to \code{1} (right). Default centres every
+#'   column.
+#' @param add.columns.uline Underline the header of the new columns? Default
+#'   \code{TRUE}.
 #' @param calcdim Logical, calculate suggested output dimensions for saving to
 #'   pdf? Calculates output size when \code{TRUE}; saves time when \code{FALSE}.
 #' @param display Logical, display the plot? Defaults to \code{TRUE}.
@@ -126,7 +137,13 @@ thresh_forest <- function(thresh,
                          II.cols = rgb(.93, .72, .80),
                          II.lwd = 8, CI.lwd = 1,
                          pointsize = 4, fontsize = 12,
-                         xbreaks = NULL, calcdim = display, display = TRUE){
+                         xbreaks = NULL,
+                         add.columns = NULL,
+                         add.columns.title = NULL,
+                         add.columns.after = -1,
+                         add.columns.hjust = 0.5,
+                         add.columns.uline = TRUE,
+                         calcdim = display, display = TRUE){
 
   # Evaluate data arguments
   y <- eval(substitute(y), data, parent.frame())
