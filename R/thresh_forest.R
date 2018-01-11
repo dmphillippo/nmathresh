@@ -394,7 +394,7 @@ thresh_forest <- function(thresh,
                        ))
 
     # Underline header
-    if (add.columns.uline & add.columns.after > Ntabcols) {
+    if (add.columns.uline & (add.columns.after > Ntabcols | add.columns.after == -1)) {
       g_add <- gtable_add_grob(g_add,
                                grobs = segmentsGrob(
                                  x0 = unit(0, "npc"), y0 = unit(0, "npc"),
