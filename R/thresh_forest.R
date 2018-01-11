@@ -369,6 +369,11 @@ thresh_forest <- function(thresh,
     # Add blank rows to account for axes
     g_add <- gtable_add_rows(g_add, heights = g_all$heights[-(1:nrow(g_add))], pos = -1)
 
+    # Add zero width column to fix underline bug with only one add.column
+    if (ncol(add.columns) == 1 & (add.columns.after == -1 | add.columns.after > Ntabcols)) {
+      g_add <- gtable_add_cols(g_add, widths = unit(0, "npc"), pos = -1)
+    }
+
     # Add extra columns at desired position
     if (add.columns.after == -1) {
       g_all <- cbind(g_all, g_add, size = "first", z = c(0, 1))
