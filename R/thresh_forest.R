@@ -358,11 +358,11 @@ thresh_forest <- function(thresh,
                          base_size = fontsize,
                          core = list(fg_params = list(
                            hjust = rep(add.columns.hjust, each = Nrows),
-                           x = rep(add.columns.hjust, each = Nrows)
+                           x = rep(add.columns.hjust*0.9 + 0.05, each = Nrows)
                          )),
                          colhead = list(fg_params = list(
                            hjust = add.columns.hjust,
-                           x = add.columns.hjust
+                           x = add.columns.hjust*0.9 + 0.05
                          ))
                        ))
 
