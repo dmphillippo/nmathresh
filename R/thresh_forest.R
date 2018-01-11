@@ -163,7 +163,7 @@ thresh_forest <- function(thresh,
   }
 
   # Set up additional columns
-  add.columns <- as.data.frame(add.columns)
+  if (!is.null(add.columns)) add.columns <- as.data.frame(add.columns)
 
   if (is.null(add.columns.title)) {
     add.columns.title <- colnames(add.columns)
@@ -315,16 +315,6 @@ thresh_forest <- function(thresh,
   # Set number of table columns
   Ntabcols <- 7
 
-  # Header underline
-  g_tab <- gtable_add_grob(g_tab,
-                           grobs = segmentsGrob(
-                             x0 = unit(0, "npc"), y0 = unit(0, "npc"),
-                             x1 = unit(1, "npc"), y1 = unit(0, "npc"),
-                             gp = gpar(lwd = 1)
-                             ),
-                           t = 1, b = 1, l = 1, r = Ntabcols
-                           )
-
   # Add in rows of forest plot to the table
   g_all <- gtable_add_cols(g_tab, unit(1, "null"))
 
@@ -353,29 +343,10 @@ thresh_forest <- function(thresh,
 
   # Add x-xaxis label
   g_all <- gtable_add_rows(g_all, heights = unit(2, "lines"))
-  g_all <- gtable_add_grob(g_all, textGrob(xlab, vjust = 1, gp = gpar(fontsize = fontsize - 1)),
-                           t = Nrows+3, b = Nrows+3, l = Ntabcols+1, r = Ntabcols+1, z = 101)
-
-  # Add legend manually (constructed as an inset table)
-  leg <- tableGrob(matrix(c("   ", paste0(y.title, "   "),
-                            "   ", paste0(CI.title, "   "),
-                            "   ", "Invariant Interval"), nrow = 1),
-                   rows = NULL, cols = NULL, theme = ttheme_minimal(base_size = fontsize - 1))
-
-  leg <- gtable_add_grob(leg, circleGrob(x = .5, y = .5, r = unit(pointsize, "pt")),
-                         t = 1, l = 1, z = -Inf)
-  leg <- gtable_add_grob(leg, linesGrob(x = c(0, 1), y = c(.5, .5),
-                                        gp = gpar(lwd = CI.lwd)),
-                         t = 1, l = 3, z = -Inf)
-  leg <- gtable_add_grob(leg, linesGrob(x = c(0, 1), y = c(.5, .5),
-                                        gp = gpar(lwd = unit(II.lwd, "pt"), col = II.colw)),
-                         t = 1, l = 5, z = -Inf)
-
-  g_all <- gtable_add_grob(g_all, leg, t = Nrows+3, b = Nrows+3, l = 2, r = Ntabcols, z = 98)
+  g_all <- gtable_add_grob(g_all, textGrob(xlab, vjust = 0.5, gp = gpar(fontsize = fontsize - 1)),
+                           t = Nrows+3, b = Nrows+3, l = Ntabcols+1, r = Ntabcols+1, z = 101, clip = "off")
 
   # Add in additional columns (if any)
-  #if (add.columns.after == -1) add.columns.after <- Ntabcols+1
-
   if (!is.null(add.columns)) {
     # Format numeric columns
     add.columns[] <- lapply(add.columns, function(x){if (is.numeric(x)) printsig(x) else x})
@@ -395,32 +366,72 @@ thresh_forest <- function(thresh,
                          ))
                        ))
 
-    # Underline header
-    if (add.columns.uline & (add.columns.after == -1 | add.columns.after > Ntabcols)) {
-      g_add <- gtable_add_grob(g_add,
-                               grobs = segmentsGrob(
-                                 x0 = unit(0, "npc"), y0 = unit(0, "npc"),
-                                 x1 = unit(1, "npc"), y1 = unit(0, "npc"),
-                                 gp = gpar(lwd = 1)
-                                 ),
-                               t = 1, b = 1, l = 1, r = ncol(g_add)
-                               )
-    }
-
-    # Add blank rows to account for axes and legends
+    # Add blank rows to account for axes
     g_add <- gtable_add_rows(g_add, heights = g_all$heights[-(1:nrow(g_add))], pos = -1)
 
     # Add extra columns at desired position
     if (add.columns.after == -1) {
-      g_all <- cbind(g_all, g_add, size = "first")
+      g_all <- cbind(g_all, g_add, size = "first", z = c(0, 1))
     } else {
       g_all <- cbind(g_all[, 1:add.columns.after], g_add, g_all[, -(1:add.columns.after)],
-                     size = "first")
+                     size = "first", z = c(0, 1, 2))
     }
 
     # Update Ntabcols, if necessary
     if (add.columns.after != -1 & add.columns.after <= Ntabcols) Ntabcols <- Ntabcols + ncol(add.columns)
   }
+
+  # Add legend manually (constructed as an inset table)
+  leg <- tableGrob(matrix(c("   ", paste0(y.title, "   "),
+                            "   ", paste0(CI.title, "   "),
+                            "   ", "Invariant Interval"), nrow = 1),
+                   rows = NULL, cols = NULL, theme = ttheme_minimal(base_size = fontsize - 1))
+
+  leg <- gtable_add_grob(leg, circleGrob(x = .5, y = .5, r = unit(pointsize, "pt")),
+                         t = 1, l = 1, z = -200)
+  leg <- gtable_add_grob(leg, linesGrob(x = c(0, 1), y = c(.5, .5),
+                                        gp = gpar(lwd = CI.lwd)),
+                         t = 1, l = 3, z = -201)
+  leg <- gtable_add_grob(leg, linesGrob(x = c(0, 1), y = c(.5, .5),
+                                        gp = gpar(lwd = unit(II.lwd, "pt"), col = II.colw)),
+                         t = 1, l = 5, z = -202)
+
+  g_all <- gtable_add_grob(g_all, leg, t = Nrows+3, b = Nrows+3, l = 2, r = Ntabcols, z = 98)
+
+  # Header underline
+  rightul <- add.columns.uline & (add.columns.after == -1 | add.columns.after > Ntabcols)
+
+  ulgrobs <- replicate(ifelse(rightul, 2, 1),
+                       segmentsGrob(
+                         x0 = unit(0, "npc"), y0 = unit(0, "npc"),
+                         x1 = unit(1, "npc"), y1 = unit(0, "npc"),
+                         gp = gpar(lwd = 1)),
+                       simplify = FALSE)
+
+  g_all <- gtable_add_grob(g_all,
+                           grobs = ulgrobs,
+                           t = 1, b = 1,
+                           l = if (rightul) c(1, Ntabcols + 2) else 1,
+                           r = if (rightul) c(Ntabcols, -1) else Ntabcols,
+                           z = Inf)
+
+  # g_all <- gtable_add_grob(g_all,
+  #                          grobs = segmentsGrob(
+  #                            x0 = unit(0, "npc"), y0 = unit(0, "npc"),
+  #                            x1 = unit(1, "npc"), y1 = unit(0, "npc"),
+  #                            gp = gpar(lwd = 1)
+  #                            ),
+  #                          t = 1, b = 1, l = 1, r = Ntabcols, z = -2)
+  #
+  # if (add.columns.uline & (add.columns.after == -1 | add.columns.after > Ntabcols)) {
+  #   g_all <- gtable_add_grob(g_all,
+  #                            grobs = segmentsGrob(
+  #                              x0 = unit(0, "npc"), y0 = unit(0, "npc"),
+  #                              x1 = unit(1, "npc"), y1 = unit(0, "npc"),
+  #                              gp = gpar(lwd = 1)
+  #                              ),
+  #                            t = 1, b = 1, l = Ntabcols + 2, r = ncol(g_all), z = -1)
+  # }
 
   # Add padding in between table and plot
   g_all <- gtable_add_cols(g_all, unit(1, "lines"), Ntabcols)
@@ -433,7 +444,7 @@ thresh_forest <- function(thresh,
   g_all <- gtable_add_padding(g_all, unit(c(.5, 1, .5, .5), "lines"))
 
   # Plot
-  if (display){
+  if (display) {
     grid.newpage()
     grid.draw(g_all)
   }
