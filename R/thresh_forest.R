@@ -260,7 +260,7 @@ thresh_forest <- function(thresh,
   Nrows <- nrow(pd)
 
   # Make expression II.title bold
-  if(is.expression(II.title)) II.title <- eval(bquote(expression(bold(.(II.title[[1]])))))
+  if (is.expression(II.title)) II.title <- eval(bquote(expression(bold(.(II.title[[1]])))))
 
   # Arrange table
   g_tab <- tableGrob(
@@ -372,6 +372,53 @@ thresh_forest <- function(thresh,
                          t = 1, l = 5, z = -Inf)
 
   g_all <- gtable_add_grob(g_all, leg, t = Nrows+3, b = Nrows+3, l = 2, r = Ntabcols, z = 98)
+
+  # Add in additional columns (if any)
+  if (!is.null(add.columns)) {
+    # Format numeric columns
+    add.columns[] <- lapply(add.columns, function(x){if (is.numeric(x)) printsig(x) else x})
+
+    # Create table grob
+    g_add <- tableGrob(add.columns,
+                       rows = NULL, cols = add.columns.title,
+                       theme = gridExtra::ttheme_minimal(
+                         base_size = fontsize,
+                         core = list(fg_params = list(
+                           hjust = rep(add.columns.hjust, each = Nrows),
+                           x = rep(add.columns.hjust, each = Nrows)
+                         )),
+                         colhead = list(fg_params = list(
+                           hjust = add.columns.hjust,
+                           x = add.columns.hjust
+                         ))
+                       ))
+
+    # Underline header
+    if (add.columns.uline & add.columns.after > Ntabcols) {
+      g_add <- gtable_add_grob(g_add,
+                               grobs = segmentsGrob(
+                                 x0 = unit(0, "npc"), y0 = unit(0, "npc"),
+                                 x1 = unit(1, "npc"), y1 = unit(0, "npc"),
+                                 gp = gpar(lwd = 1)
+                                 ),
+                               t = 1, b = 1, l = 1, r = ncol(g_add)
+                               )
+    }
+
+    # Add blank rows to account for axes and legends
+    g_add <- gtable_add_rows(g_add, heights = g_all$heights[-(1:nrow(g_add))], pos = -1)
+
+    # Add extra columns at desired position
+    if (add.columns.after == -1) {
+      g_all <- cbind(g_all, g_add, size = "first")
+    } else {
+      g_all <- cbind(g_all[, 1:add.columns.after], g_add, g_all[, -(1:add.columns.after)],
+                     size = "first")
+    }
+
+    # Update Ntabcols, if necessary
+    if (add.columns.after <= Ntabcols) Ntabcols <- Ntabcols + ncol(add.columns)
+  }
 
   # Add padding in between table and plot
   g_all <- gtable_add_cols(g_all, unit(1, "lines"), Ntabcols)
