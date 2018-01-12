@@ -28,9 +28,14 @@
 #' @param trt.sub Only look at thresholds in this subset of treatments in
 #'   trt.code, e.g. if some are excluded from the ranking. Default is equivalent
 #'   to 1:K.
-#' @param mcid.new Consider changing the decision to an alternative treatment
-#'   only when it is more effective than the base-case optimal treatment by this
-#'   minimal clinically important difference. Defaults to 0.
+#' @param mcid Minimal clinically important difference for the decision (when
+#'   \code{mcid.type = 'decision'}) or for changing the decision (when
+#'   \code{mcid.type = 'change'}). Defaults to 0, use the maximal efficacy
+#'   decision rule.
+#' @param mcid.type Default \code{'decision'}, the decision rule is based on
+#'   MCID (see details). Otherwise \code{'change'}, use the maximum efficacy
+#'   rule, but only consider changing the decision when the alternative
+#'   treatment becomes more effective than the base case by \code{mcid} or more.
 #'
 #' @details This function provides bias-adjustment threshold analysis for both
 #'   fixed and random effects NMA models, as described by Phillippo \emph{et
@@ -76,6 +81,22 @@
 #'   sensible prior. In the RE case, the threshold derivations make the
 #'   approximation that \eqn{\tau^2} is fixed and known.
 #'
+#' @section Decision rules:
+#'
+#'   The default decision rule is maximal efficacy; the optimal treatment is
+#'   \eqn{ k^* = \mathrm{argmax}_k \mathbb{E}(d_{k})}{k* = argmax(E(d_k))}.
+#'
+#'   When \eqn{\epsilon} = \code{mcid} is greater than zero and
+#'   \code{mcid.type = 'decision'}, the decision rule is no longer for a single
+#'   best treatment, but is based on minimal clinically important difference. A
+#'   treatment is in the optimal set if \eqn{\mathbb{E}(d_k) \ge
+#'   \epsilon}{E(d_k) \ge \epsilon} and \eqn{\max_a \mathbb{E}(d_a) -
+#'   \mathbb{E}(d_k) \le \epsilon}{max E(d_a) - E(d_k) \le \epsilon}.
+#'
+#'   When \code{mcid.type = 'change'}, the maximal efficacy rule is used, but
+#'   thresholds are found for when a new treatment is better than the base-case
+#'   optimal by at least \code{mcid}.
+#'
 #' @return An object of class \code{thresh}.
 #' @seealso \code{\link{recon_vcov}}, \code{\link{thresh_forest}},
 #'   \code{\link{thresh-class}}.
@@ -117,7 +138,7 @@ nma_thresh <- function(mean.dk, lhood, post,
                        X=NULL,
                        mu.design=NULL, delta.design=diag(nrow=dim(lhood)),
                        opt.max=TRUE, trt.rank=1, trt.code=NULL, trt.sub=NULL,
-                       mcid.new=0) {
+                       mcid=0, mcid.type='decision') {
 
 
 ## Basic parameter checks --------------------------------------------------
