@@ -232,9 +232,17 @@ nma_thresh <- function(mean.dk, lhood, post,
     stop("trt.rank is larger than the length of trt.sub")
   }
 
-  # mcid.new should be a single non-negative numeric value
-  if (!is.numeric(mcid.new) | length(mcid.new) != 1 | mcid.new < 0) {
-    stop("mcid.new should be a single non-negative numeric value")
+  # mcid should be a single non-negative numeric value
+  if (!is.numeric(mcid) | length(mcid) != 1 | mcid < 0) {
+    stop("mcid should be a single non-negative numeric value")
+  }
+
+  # Check mcid.type
+  mcid.type <- match.arg(mcid.type, c('decision', 'change'))
+
+  # Can't use mcid decision rule and treatment ranks
+  if (mcid > 0 & mcid.type == 'decision' & trt.rank > 1) {
+    stop("Can't use mcid decision rule and trt.rank at the same time.")
   }
 
 
