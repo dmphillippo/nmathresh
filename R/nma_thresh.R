@@ -326,25 +326,40 @@ nma_thresh <- function(mean.dk, lhood, post,
   # Updated to handle trt.sub, only look for k* in a subset of treatments.
 
   mean.dk.subNA <- mean.dk
-  mean.dk.subNA[!(1:(K-1) %in% (trt.sub.internal - 1))] <- NA
+  mean.dk.subNA[!(1:(K - 1) %in% (trt.sub.internal - 1))] <- NA
 
-  if (opt.max){
-    kstar <- order(c(0, mean.dk.subNA), decreasing=TRUE)[trt.rank]
-  } else if (!opt.max){
-    kstar <- order(c(0, mean.dk.subNA), decreasing=FALSE)[trt.rank]
+  if (opt.max) {
+    if (mcid > 0 & mcid.type == 'decision') {
+      kstar <- which(mean.dk.subNA >= mcid & max(mean.dk.subNA) - mean.dk.subNA <= mcid) + 1
+    } else {
+      kstar <- order(c(0, mean.dk.subNA), decreasing = TRUE)[trt.rank]
+    }
+  } else if (!opt.max) {
+    if (mcid > 0 & mcid.type == 'decision') {
+      kstar <- which(mean.dk.subNA <= -mcid & min(mean.dk.subNA) - mean.dk.subNA >= -mcid) + 1
+    } else {
+      kstar <- order(c(0, mean.dk.subNA), decreasing = FALSE)[trt.rank]
+    }
   }
 
-  if (trt.rank == 1) {
+  if (mcid > 0 & mcid.type == 'decision') {
+    message("Current optimal treatment set is k* = ", paste(trt.code[kstar], collapse = ", "), ".")
+  } else if (trt.rank == 1) {
     message("Current optimal treatment is k* = ", trt.code[kstar], ".")
   } else {
     message("Current rank ", trt.rank, " treatment is k = ", trt.code[kstar], ".")
   }
 
-  # And these contrasts have non-zero elements in the contrast design matrix D
-  if (kstar > 1) {
-    contr.kstar <- which(D[,kstar-1] != 0)
+  # Which rows of U correspond to treatments in kstar?
+  # Contrasts with non-zero elements in the contrast design matrix D
+  # When kstar is a set of more than one treatment, we don't care about switches
+  # within kstar, so only one non-zero entry.
+  if (length(kstar) > 1) {
+    contr.kstar <- which(rowSums(abs(D[ ,kstar - 1] != 0)) == 1)
+  } else if (kstar > 1) {
+    contr.kstar <- which(D[ ,kstar - 1] != 0)
   } else {
-    contr.kstar <- 1:(K-1)
+    contr.kstar <- 1:(K - 1)
   }
 
   # So we look in the corresponding rows of the threshold matrix
