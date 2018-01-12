@@ -363,7 +363,7 @@ nma_thresh <- function(mean.dk, lhood, post,
   }
 
   # So we look in the corresponding rows of the threshold matrix
-  threshmat.kstar <- threshmat[contr.kstar,]
+  threshmat.kstar <- threshmat[contr.kstar, , drop = FALSE]
 
 
 ## Derive thresholds -------------------------------------------------------
