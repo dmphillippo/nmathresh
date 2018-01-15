@@ -535,7 +535,7 @@ get.int <- function(x, kstar, trt.code, contrs, mcid = FALSE,
             } else {
               # Otherwise, another has joined kstar
               lo <- x.neg[i]
-              lo.newkstar <- trt.code[c(kstar, setdiff(ab.neg[i,], kstar.thr), recursive = TRUE)]
+              lo.newkstar <- trt.code[sort(c(kstar, setdiff(ab.neg[i,], kstar.thr), recursive = TRUE))]
               break
             }
           }
@@ -584,7 +584,7 @@ get.int <- function(x, kstar, trt.code, contrs, mcid = FALSE,
             } else {
               # Otherwise, another has joined kstar
               hi <- x.pos[i]
-              hi.newkstar <- trt.code[c(kstar, setdiff(ab.pos[i,], kstar.thr), recursive = TRUE)]
+              hi.newkstar <- trt.code[sort(c(kstar, setdiff(ab.pos[i,], kstar.thr), recursive = TRUE))]
               break
             }
           }
