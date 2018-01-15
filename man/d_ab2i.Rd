@@ -21,7 +21,7 @@ d_i2ab(i, K)
 }
 \value{
 \code{d_ab2i} returns a vector of indices \code{i}. \code{d_i2ab}
-  returns a list of two vectors of (paired) indices \code{a} and \code{b}.
+  returns a data frame of indices \code{a} and \code{b}.
 }
 \description{
 Functions for converting between \eqn{d_{ab}} indexing of contrasts (useful
