@@ -292,7 +292,7 @@ nma_thresh <- function(mean.dk, lhood, post,
   }
 
   # Add row names to H matrix (inflmat)
-  rownames(inflmat) <- paste0("d[", 2:K, "]")
+  rownames(inflmat) <- paste0("d[", trt.code[2:K], "]")
 
 
 ## Derive solution matrix U -------------------------------------------------
@@ -316,7 +316,7 @@ nma_thresh <- function(mean.dk, lhood, post,
   }
 
   # Add row names to U matrix (threshmat)
-  rownames(threshmat) <- paste0("d[", d_ab$a, ",", d_ab$b, "]")
+  rownames(threshmat) <- paste0("d[", trt.code[d_ab$a], ",", trt.code[d_ab$b], "]")
 
   # Now we only need to look at contrasts involving the optimal treatment k*
   # Updated to handle trt.rank, to pick out other ranked treatments than the
