@@ -602,7 +602,8 @@ get.int <- function(x, kstar, trt.code, contrs, mcid = FALSE,
   thresholds <- data.frame(lo = lo,
                            lo.newkstar = paste0(lo.newkstar, collapse = ", "),
                            hi = hi,
-                           hi.newkstar = paste0(hi.newkstar, collapse = ", "))
+                           hi.newkstar = paste0(hi.newkstar, collapse = ", "),
+                           stringsAsFactors = FALSE)
   rownames(thresholds) <- NULL
 
   return(thresholds)
