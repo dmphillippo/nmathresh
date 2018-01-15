@@ -5,7 +5,7 @@
 \title{Get thresholds from U matrix}
 \usage{
 get.int(x, kstar, trt.code, contrs, mcid = FALSE, mean.dk = NULL,
-  opt.max = NULL)
+  inflmat = NULL, opt.max = NULL)
 }
 \arguments{
 \item{x}{Column of \eqn{U} matrix, containing all possible threshold
@@ -23,6 +23,9 @@ as rows of the data.frame output by \code{d_i2ab}.}
 
 \item{mean.dk}{Posterior means of basic treatment parameters, required when
 \code{mcid} is \code{TRUE}.}
+
+\item{inflmat}{Column of influence matrix \eqn{H} for the data point,
+required when \code{mcid} is \code{TRUE}.}
 
 \item{opt.max}{Is the maximum treatment effect optimal? See
 \code{nma_thresh} parameter of same name. Required when \code{mcid} is
