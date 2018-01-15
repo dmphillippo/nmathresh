@@ -230,12 +230,9 @@ thresh_forest <- function(thresh,
                                   printsig(pd[i, "II.hi"], cutyn = TRUE), ")")
   }
 
-  # New k*
-  pd$lo.newkstar.txt <- format(pd$lo.newkstar, digits = 0)
-  pd$lo.newkstar.txt[is.na(pd$lo.newkstar) | pd$II.lo <= cutoff[1]] <- "\u2013"
-
-  pd$hi.newkstar.txt <- format(pd$hi.newkstar, digits = 0)
-  pd$hi.newkstar.txt[is.na(pd$hi.newkstar) | pd$II.hi >= cutoff[2]] <- "\u2013"
+  # If no thresholds found (or beyond cutoff), set newkstar to "-"
+  pd$lo.newkstar[is.na(pd$lo.newkstar) | pd$II.lo <= cutoff[1]] <- "\u2013"
+  pd$hi.newkstar[is.na(pd$hi.newkstar) | pd$II.hi >= cutoff[2]] <- "\u2013"
 
   # Get details of short (statistically insignificant) intervals
   pd$is.short <- pd$II.lo > pd$CI.lo | pd$II.hi < pd$CI.hi
@@ -265,7 +262,7 @@ thresh_forest <- function(thresh,
   # Arrange table
   g_tab <- tableGrob(
     d = pd[, c("lab.clinshort", "label", "y.txt", "CI.txt",
-            "lo.newkstar.txt", "II.txt", "hi.newkstar.txt")],
+            "lo.newkstar", "II.txt", "hi.newkstar")],
     rows = NULL,
     cols = c("", label.title, y.title, CI.title, "", "", ""),
     theme = gridExtra::ttheme_minimal(
