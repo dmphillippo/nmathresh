@@ -349,12 +349,17 @@ nma_thresh <- function(mean.dk, lhood, post,
   }
 
   # Which rows of U correspond to treatments in kstar?
-  # When kstar is a set of more than one treatment, we don't care about switches
-  # within kstar, so only one of a or b can be in kstar (xor).
   # We also only want contrasts involving treatments in trt.sub.
-  contr.kstar <- which(xor(d_ab$a %in% kstar, d_ab$b %in% kstar) &
-                         d_ab$a %in% trt.sub.internal &
-                         d_ab$b %in% trt.sub.internal)
+  if (mcid > 0 & mcid.type == 'decision') {
+    # If using MCID decision rule, we do want thresholds for contrasts between treatments in kstar
+    contr.kstar <- which((d_ab$a %in% kstar & d_ab$b %in% trt.sub.internal) |
+                           (d_ab$b %in% kstar & d_ab$a %in% trt.sub.internal))
+  } else {
+    # Otherwise we don't care about switches within kstar, so only one of a or b can be in kstar (xor).
+    contr.kstar <- which(xor(d_ab$a %in% kstar, d_ab$b %in% kstar) &
+                           d_ab$a %in% trt.sub.internal &
+                           d_ab$b %in% trt.sub.internal)
+  }
 
   # So we look in the corresponding rows of the threshold matrix
   threshmat.kstar <- threshmat[contr.kstar, , drop = FALSE]
@@ -473,7 +478,7 @@ get.int <- function(x, kstar, trt.code, contrs, mcid = FALSE, mean.dk = NULL, op
       lo.newkstar <- trt.code[contrs[i.lo, contrs[i.lo, ] != kstar]]
     }
   } else if (mcid == TRUE) {
-  # When using MCID decision rule
+    # When using MCID decision rule
 
   }
 
