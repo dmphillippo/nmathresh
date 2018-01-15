@@ -591,7 +591,7 @@ get.int <- function(x, kstar, trt.code, contrs, mcid = FALSE,
           # Otherwise continue, no threshold
         }
         # If we have reached the end of the loop, no threshold found
-        if (i == length(i.neg)) {
+        if (i == length(i.pos)) {
           hi <- Inf
           hi.newkstar <- NA_character_
         }
