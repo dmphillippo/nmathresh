@@ -4,7 +4,8 @@
 \alias{get.int}
 \title{Get thresholds from U matrix}
 \usage{
-get.int(x, kstar, trt.code, trt.sub)
+get.int(x, kstar, trt.code, contrs, mcid = FALSE, mean.dk = NULL,
+  opt.max = NULL)
 }
 \arguments{
 \item{x}{Column of \eqn{U} matrix, containing all possible threshold
@@ -15,8 +16,17 @@ solutions for a data point.}
 \item{trt.code}{Vector of (possibly recoded) treatments. See
 \code{nma_thresh} parameter of the same name.}
 
-\item{trt.sub}{Vector of treatment indices, subset of trt.code, to consider.
-See \code{nma_thresh} parameter of the same name.}
+\item{contrs}{Details of contrasts corresponding to rows in \code{x},
+as rows of the data.frame output by \code{d_i2ab}.}
+
+\item{mcid}{Use MCID decision rule? Default \code{FALSE}.}
+
+\item{mean.dk}{Posterior means of basic treatment parameters, required when
+\code{mcid} is \code{TRUE}.}
+
+\item{opt.max}{Is the maximum treatment effect optimal? See
+\code{nma_thresh} parameter of same name. Required when \code{mcid} is
+\code{TRUE}.}
 }
 \value{
 Data frame of thresholds and new optimal treatments with columns

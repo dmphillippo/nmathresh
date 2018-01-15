@@ -365,7 +365,10 @@ nma_thresh <- function(mean.dk, lhood, post,
   thresholds <- as.data.frame(
     do.call(rbind,
             apply(threshmat.kstar, 2,
-                  get.int, kstar, trt.code, trt.sub
+                  get.int, kstar, trt.code, d_ab[contr.kstar,],
+                  mcid = mcid.type == "decision" & mcid > 0,
+                  mean.dk = mean.dk,
+                  opt.max = opt.max
                   )
             )
     )
@@ -416,47 +419,63 @@ nma_thresh <- function(mean.dk, lhood, post,
 #' @param kstar Base-case optimal treatment.
 #' @param trt.code Vector of (possibly recoded) treatments. See
 #'   \code{nma_thresh} parameter of the same name.
-#' @param trt.sub Vector of treatment indices, subset of trt.code, to consider.
-#'   See \code{nma_thresh} parameter of the same name.
+#' @param contrs Details of contrasts corresponding to rows in \code{x},
+#'   as rows of the data.frame output by \code{d_i2ab}.
+#' @param mcid Use MCID decision rule? Default \code{FALSE}.
+#' @param mean.dk Posterior means of basic treatment parameters, required when
+#'   \code{mcid} is \code{TRUE}.
+#' @param opt.max Is the maximum treatment effect optimal? See
+#'   \code{nma_thresh} parameter of same name. Required when \code{mcid} is
+#'   \code{TRUE}.
 #'
 #' @return Data frame of thresholds and new optimal treatments with columns
 #'   \code{lo}, \code{lo.newkstar}, \code{hi}, and \code{hi.newkstar}.
 #' @export
 #'
-get.int <- function(x, kstar, trt.code, trt.sub) {
+get.int <- function(x, kstar, trt.code, contrs, mcid = FALSE, mean.dk = NULL, opt.max = NULL) {
 
-  trt.sub.internal <- which(trt.code %in% trt.sub)
-
-  # If both thresholds are infinite
-  if (all(is.infinite(x))) {
-    hi <- Inf
-    lo <- -Inf
-    hi.newkstar <- lo.newkstar <- NA
-
-  # If lower threshold is infinite
-  } else if (all(x[!is.infinite(x)] > 0)) {
-    hi <- min(x[!is.infinite(x)])
-    hi.newkstar <-
-      trt.code[trt.sub.internal[which(x==hi) + (which(x==hi) >= which(trt.sub.internal==kstar))*1]]
-    lo <- -Inf
-    lo.newkstar <- NA
-
-  # If upper threshold is infinite
-  } else if (all(x[!is.infinite(x)] < 0)) {
-    hi <- Inf
-    hi.newkstar <- NA
-    lo <- max(x[!is.infinite(x)])
-    lo.newkstar <-
-      trt.code[trt.sub.internal[which(x==lo) + (which(x==lo) >= which(trt.sub.internal==kstar))*1]]
-
-  # If neither threshold is infinite
-  } else {
-    hi <- min(x[x>0 & !is.infinite(x)])
-    hi.newkstar <-
-      trt.code[trt.sub.internal[which(x==hi) + (which(x==hi) >= which(trt.sub.internal==kstar))*1]]
-    lo <- max(x[x<0 & !is.infinite(x)])
-    lo.newkstar <-
-      trt.code[trt.sub.internal[which(x==lo) + (which(x==lo) >= which(trt.sub.internal==kstar))*1]]
+  # Basic parameter checks
+  if (mcid == TRUE & (is.null(mean.dk) | is.null(opt.max))) {
+    stop("Provide mean.dk and opt.max when mcid = TRUE")
   }
+
+  # When using standard decision rule
+  if (mcid == FALSE & length(kstar) == 1) {
+    # If both thresholds are infinite
+    if (all(is.infinite(x))) {
+      hi <- Inf
+      lo <- -Inf
+      hi.newkstar <- lo.newkstar <- NA_character_
+
+    # If lower threshold is infinite
+    } else if (all(x[!is.infinite(x)] > 0)) {
+      hi <- min(x[!is.infinite(x)])
+      i.hi <- which(x == hi)
+      hi.newkstar <- trt.code[contrs[i.hi, contrs[i.hi, ] != kstar]]
+      lo <- -Inf
+      lo.newkstar <- NA_character_
+
+    # If upper threshold is infinite
+    } else if (all(x[!is.infinite(x)] < 0)) {
+      hi <- Inf
+      hi.newkstar <- NA_character_
+      lo <- max(x[!is.infinite(x)])
+      i.lo <- which(x == lo)
+      lo.newkstar <- trt.code[contrs[i.lo, contrs[i.lo, ] != kstar]]
+
+    # If neither threshold is infinite
+    } else {
+      hi <- min(x[x>0 & !is.infinite(x)])
+      i.hi <- which(x == hi)
+      hi.newkstar <- trt.code[contrs[i.hi, contrs[i.hi, ] != kstar]]
+      lo <- max(x[x<0 & !is.infinite(x)])
+      i.lo <- which(x == lo)
+      lo.newkstar <- trt.code[contrs[i.lo, contrs[i.lo, ] != kstar]]
+    }
+  } else if (mcid == TRUE) {
+  # When using MCID decision rule
+
+  }
+
   return(data.frame(lo=lo,lo.newkstar=lo.newkstar,hi=hi,hi.newkstar=hi.newkstar))
 }
