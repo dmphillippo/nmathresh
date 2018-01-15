@@ -349,10 +349,12 @@ nma_thresh <- function(mean.dk, lhood, post,
   }
 
   # Which rows of U correspond to treatments in kstar?
-  # Contrasts with non-zero elements in the contrast design matrix D
   # When kstar is a set of more than one treatment, we don't care about switches
-  # within kstar, so only one non-zero entry.
-  contr.kstar <- which(xor(d_ab$a %in% kstar, d_ab$b %in% kstar))
+  # within kstar, so only one of a or b can be in kstar (xor).
+  # We also only want contrasts involving treatments in trt.sub.
+  contr.kstar <- which(xor(d_ab$a %in% kstar, d_ab$b %in% kstar) &
+                         d_ab$a %in% trt.sub.internal &
+                         d_ab$b %in% trt.sub.internal)
 
   # So we look in the corresponding rows of the threshold matrix
   threshmat.kstar <- threshmat[contr.kstar, , drop = FALSE]
@@ -360,17 +362,13 @@ nma_thresh <- function(mean.dk, lhood, post,
 
 ## Derive thresholds -------------------------------------------------------
 
-  # Only look in rows which correspond to contrasts with treatments in trt.sub
-  contr.trt.sub <- trt.sub.internal[-which(trt.sub.internal == kstar)] -
-    (trt.sub.internal[-which(trt.sub.internal == kstar)] >= kstar)*1
-
-    thresholds <- as.data.frame(
-      do.call(rbind,
-              apply(threshmat.kstar[contr.trt.sub, , drop = FALSE], 2,
-                    get.int, kstar, trt.code, trt.sub
-                    )
-              )
-      )
+  thresholds <- as.data.frame(
+    do.call(rbind,
+            apply(threshmat.kstar, 2,
+                  get.int, kstar, trt.code, trt.sub
+                  )
+            )
+    )
 
 
 ## Return thresh object ----------------------------------------------------
