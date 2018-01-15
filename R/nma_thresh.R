@@ -248,21 +248,13 @@ nma_thresh <- function(mean.dk, lhood, post,
 
 ## Pre-processing ----------------------------------------------------------
 
+  # Get contrast details
+  d_ab <- d_i2ab(1:(K*(K-1)/2), K)
+
   # Create contrast "design" matrix
-  D <- matrix(nrow=K*(K-1)/2, ncol=K-1)
-  j <- 1
-  for (i in 1:(K-1)) {
-    if (i == 1) {
-      D[j:(j+K-i-1),] <- diag(nrow=K-i)
-    } else if (i == 2) {
-       D[j:(j+K-i-1),] <- cbind(rep.int(-1,K-i), diag(nrow=K-i))
-    } else {
-      D[j:(j+K-i-1),] <- cbind(matrix(rep.int(0, (K-i)*(i-2)), ncol=i-2),
-                               rep.int(-1, K-i),
-                               diag(nrow=K-i))
-    }
-    j <- j+K-i
-  }
+  D <- matrix(0, nrow=K*(K-1)/2, ncol=K-1)
+  D[cbind(1:nrow(D), d_ab$a - 1)] <- -1
+  D[cbind(1:nrow(D), d_ab$b - 1)] <- 1
 
   # Create vector of contrasts d_ab
   contr <- as.vector(D %*% mean.dk)
