@@ -352,13 +352,7 @@ nma_thresh <- function(mean.dk, lhood, post,
   # Contrasts with non-zero elements in the contrast design matrix D
   # When kstar is a set of more than one treatment, we don't care about switches
   # within kstar, so only one non-zero entry.
-  if (length(kstar) > 1) {
-    contr.kstar <- which(rowSums(abs(D[ ,kstar - 1] != 0)) == 1)
-  } else if (kstar > 1) {
-    contr.kstar <- which(D[ ,kstar - 1] != 0)
-  } else {
-    contr.kstar <- 1:(K - 1)
-  }
+  contr.kstar <- which(xor(d_ab$a %in% kstar, d_ab$b %in% kstar))
 
   # So we look in the corresponding rows of the threshold matrix
   threshmat.kstar <- threshmat[contr.kstar, , drop = FALSE]
