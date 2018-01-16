@@ -163,23 +163,26 @@ thresh_forest <- function(thresh,
   }
 
   # Set up additional columns
-  if (!is.null(add.columns)) add.columns <- as.data.frame(add.columns)
+  if (!is.null(add.columns)) {
+    add.columns <- as.data.frame(add.columns)
 
-  if (is.null(add.columns.title)) {
-    add.columns.title <- colnames(add.columns)
-  }
-  if (length(add.columns.title) != ncol(add.columns)) {
-    stop("Mismatch number of additional columns and titles")
-  }
+    if (is.null(add.columns.title)) {
+      add.columns.title <- colnames(add.columns)
+    }
+    if (length(add.columns.title) != ncol(add.columns)) {
+      stop("Mismatch number of additional columns and titles")
+    }
 
-  add.columns.hjust <- rep_len(add.columns.hjust, ncol(add.columns))
+    add.columns.hjust <- rep_len(add.columns.hjust, ncol(add.columns))
+  }
 
   # Check number of rows
   stopifnot(length(y) == N,
             length(CI.lo) == N,
             length(CI.hi) == N,
-            length(label) == N,
-            nrow(add.columns) == N)
+            length(label) == N)
+
+  if (!is.null(add.columns) && nrow(add.columns) != N) stop("Mismatch number of rows for add.columns")
 
   # Set up plot data
   pd <- cbind(data.frame(y = y, CI.lo = CI.lo, CI.hi = CI.hi, label = label),
@@ -230,12 +233,9 @@ thresh_forest <- function(thresh,
                                   printsig(pd[i, "II.hi"], cutyn = TRUE), ")")
   }
 
-  # New k*
-  pd$lo.newkstar.txt <- format(pd$lo.newkstar, digits = 0)
-  pd$lo.newkstar.txt[is.na(pd$lo.newkstar) | pd$II.lo <= cutoff[1]] <- "\u2013"
-
-  pd$hi.newkstar.txt <- format(pd$hi.newkstar, digits = 0)
-  pd$hi.newkstar.txt[is.na(pd$hi.newkstar) | pd$II.hi >= cutoff[2]] <- "\u2013"
+  # If no thresholds found (or beyond cutoff), set newkstar to "-"
+  pd$lo.newkstar[is.na(pd$lo.newkstar) | pd$II.lo <= cutoff[1]] <- "\u2013"
+  pd$hi.newkstar[is.na(pd$hi.newkstar) | pd$II.hi >= cutoff[2]] <- "\u2013"
 
   # Get details of short (statistically insignificant) intervals
   pd$is.short <- pd$II.lo > pd$CI.lo | pd$II.hi < pd$CI.hi
@@ -265,20 +265,20 @@ thresh_forest <- function(thresh,
   # Arrange table
   g_tab <- tableGrob(
     d = pd[, c("lab.clinshort", "label", "y.txt", "CI.txt",
-            "lo.newkstar.txt", "II.txt", "hi.newkstar.txt")],
+            "lo.newkstar", "II.txt", "hi.newkstar")],
     rows = NULL,
     cols = c("", label.title, y.title, CI.title, "", "", ""),
     theme = gridExtra::ttheme_minimal(
       base_size = fontsize,
       core = list(fg_params = list(
-        hjust = rep(c(0, 0, 0, .5, 1,.5, 1), each = Nrows),
+        hjust = rep(c(0, 0, 0, .5, .5, .5, .5), each = Nrows),
         x = rep(c(.6, 0,.5, .5, .5, .5, .5), each = Nrows),
         fontface = c(rep("plain", Nrows), pd$lab.ff, rep("plain", Nrows*5)),
         vjust = rep(c(1, .5, .5, .5, .5, .5, .5), each = Nrows),
         y = rep(c(1, .5, .5, .5, .5, .5, .5), each = Nrows)
         )),
       colhead = list(fg_params = list(
-        hjust = c(0, 0,.5, .5, 1,.5, 1),
+        hjust = c(0, 0, .5, .5, .5, .5, .5),
         vjust = c(0, 0, 0, 0, 0, 0, 0),
         x = c(0, 0,.5, .5, .5, .5, .5),
         y = c(.25, .25, .25, .25, .25, .25, .25)
@@ -370,7 +370,7 @@ thresh_forest <- function(thresh,
     g_add <- gtable_add_rows(g_add, heights = g_all$heights[-(1:nrow(g_add))], pos = -1)
 
     # Add zero width column to fix underline bug with only one add.column
-    if (ncol(add.columns) == 1 & (add.columns.after == -1 | add.columns.after > Ntabcols)) {
+    if (ncol(add.columns) == 1 && (add.columns.after == -1 || add.columns.after > Ntabcols)) {
       g_add <- gtable_add_cols(g_add, widths = unit(0, "npc"), pos = -1)
     }
 
@@ -383,7 +383,7 @@ thresh_forest <- function(thresh,
     }
 
     # Update Ntabcols, if necessary
-    if (add.columns.after != -1 & add.columns.after <= Ntabcols) Ntabcols <- Ntabcols + ncol(add.columns)
+    if (add.columns.after != -1 && add.columns.after <= Ntabcols) Ntabcols <- Ntabcols + ncol(add.columns)
   }
 
   # Add legend manually (constructed as an inset table)
@@ -404,7 +404,9 @@ thresh_forest <- function(thresh,
   g_all <- gtable_add_grob(g_all, leg, t = Nrows+3, b = Nrows+3, l = 2, r = Ntabcols, z = 98)
 
   # Header underline
-  rightul <- add.columns.uline & (add.columns.after == -1 | add.columns.after > Ntabcols)
+  rightul <- (!is.null(add.columns)) &&
+    add.columns.uline &&
+    (add.columns.after == -1 || add.columns.after > Ntabcols)
 
   ulgrobs <- replicate(ifelse(rightul, 2, 1),
                        segmentsGrob(
@@ -441,7 +443,7 @@ thresh_forest <- function(thresh,
   # Add padding in between table and plot
   g_all <- gtable_add_cols(g_all, unit(1, "lines"), Ntabcols)
 
-  if (add.columns.after == -1 | add.columns.after > Ntabcols) {
+  if (!is.null(add.columns) && add.columns.after == -1 || add.columns.after > Ntabcols) {
     g_all <- gtable_add_cols(g_all, unit(1, "lines"), Ntabcols + 2)
   }
 

@@ -11,7 +11,7 @@
 #' @param K Total number of treatments.
 #'
 #' @return \code{d_ab2i} returns a vector of indices \code{i}. \code{d_i2ab}
-#'   returns a list of two vectors of (paired) indices \code{a} and \code{b}.
+#'   returns a data frame of indices \code{a} and \code{b}.
 #' @export
 #' @aliases d_i2ab
 #'
@@ -52,5 +52,5 @@ d_i2ab <- function(i, K) {
     b[j] <- i[j] - c(0, tri)[a[j]] + a[j]
   }
 
-  return(list(a=a, b=b))
+  return(data.frame(a=a, b=b))
 }
