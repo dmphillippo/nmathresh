@@ -80,7 +80,7 @@ thresh_2d <- function(thresh, idx, idy,
                       fontsize = 12){
 
   # Cannot handle mcid decisions / vector kstar yet
-  if (length(thresh$kstar) > 1 | (thresh$call$mcid > 0 & thresh$call$mcid.type == 'decision')) {
+  if (length(thresh$kstar) > 1 || (thresh$call$mcid > 0 && thresh$call$mcid.type == 'decision')) {
     stop("Decision rules with multiple optimal treatments not yet supported.")
   }
 
