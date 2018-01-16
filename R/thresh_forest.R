@@ -370,7 +370,7 @@ thresh_forest <- function(thresh,
     g_add <- gtable_add_rows(g_add, heights = g_all$heights[-(1:nrow(g_add))], pos = -1)
 
     # Add zero width column to fix underline bug with only one add.column
-    if (ncol(add.columns) == 1 & (add.columns.after == -1 | add.columns.after > Ntabcols)) {
+    if (ncol(add.columns) == 1 && (add.columns.after == -1 || add.columns.after > Ntabcols)) {
       g_add <- gtable_add_cols(g_add, widths = unit(0, "npc"), pos = -1)
     }
 
@@ -383,7 +383,7 @@ thresh_forest <- function(thresh,
     }
 
     # Update Ntabcols, if necessary
-    if (add.columns.after != -1 & add.columns.after <= Ntabcols) Ntabcols <- Ntabcols + ncol(add.columns)
+    if (add.columns.after != -1 && add.columns.after <= Ntabcols) Ntabcols <- Ntabcols + ncol(add.columns)
   }
 
   # Add legend manually (constructed as an inset table)
@@ -404,7 +404,9 @@ thresh_forest <- function(thresh,
   g_all <- gtable_add_grob(g_all, leg, t = Nrows+3, b = Nrows+3, l = 2, r = Ntabcols, z = 98)
 
   # Header underline
-  rightul <- add.columns.uline & (add.columns.after == -1 | add.columns.after > Ntabcols)
+  rightul <- (!is.null(add.columns)) &&
+    add.columns.uline &&
+    (add.columns.after == -1 || add.columns.after > Ntabcols)
 
   ulgrobs <- replicate(ifelse(rightul, 2, 1),
                        segmentsGrob(
@@ -441,7 +443,7 @@ thresh_forest <- function(thresh,
   # Add padding in between table and plot
   g_all <- gtable_add_cols(g_all, unit(1, "lines"), Ntabcols)
 
-  if (add.columns.after == -1 | add.columns.after > Ntabcols) {
+  if (!is.null(add.columns) && add.columns.after == -1 || add.columns.after > Ntabcols) {
     g_all <- gtable_add_cols(g_all, unit(1, "lines"), Ntabcols + 2)
   }
 
