@@ -328,13 +328,13 @@ nma_thresh <- function(mean.dk, lhood, post,
 
   if (opt.max) {
     if (mcid > 0 & mcid.type == 'decision') {
-      kstar <- which(mean.dk.subNA >= mcid & max(mean.dk.subNA) - mean.dk.subNA <= mcid) + 1
+      kstar <- which(mean.dk.subNA >= mcid & max(mean.dk.subNA, na.rm = TRUE) - mean.dk.subNA <= mcid) + 1
     } else {
       kstar <- order(c(0, mean.dk.subNA), decreasing = TRUE)[trt.rank]
     }
   } else if (!opt.max) {
     if (mcid > 0 & mcid.type == 'decision') {
-      kstar <- which(mean.dk.subNA <= -mcid & min(mean.dk.subNA) - mean.dk.subNA >= -mcid) + 1
+      kstar <- which(mean.dk.subNA <= -mcid & min(mean.dk.subNA, na.rm = TRUE) - mean.dk.subNA >= -mcid) + 1
     } else {
       kstar <- order(c(0, mean.dk.subNA), decreasing = FALSE)[trt.rank]
     }
