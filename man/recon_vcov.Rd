@@ -11,14 +11,14 @@ recon_vcov(post, prior.prec = 1e-04, prior.vcov = diag(1/prior.prec,
 \item{post}{Posterior covariance matrix.}
 
 \item{prior.prec}{Prior precision. Defaults to .0001 which is a common flat
-prior for NMA. Not used if prior.vcov is specified.}
+prior for NMA. Not used if \code{prior.vcov} is specified.}
 
 \item{prior.vcov}{Prior covariance matrix. Defaults to a diagonal matrix of
-the same size as post, with elements 1/prior.prec.}
+the same size as post, with elements \code{1/prior.prec}.}
 
 \item{X}{Contrast design matrix. If omitted a complete network is assumed.}
 
-\item{verbose}{Print intermediate matrices? Defaults to FALSE.}
+\item{verbose}{Print intermediate matrices? Defaults to \code{FALSE}.}
 }
 \value{
 A matrix; the reconstructed likelihood covariance matrix.

@@ -35,8 +35,8 @@
 #' @param sigfig Number of significant digits to display in the table. Default
 #'   3.
 #' @param digits Number of decimal places to display in the table. Overrides
-#'   sigfig if set.
-#' @param refline x intercept of vertical reference line, if desired.
+#'   \code{sigfig} if set.
+#' @param refline \eqn{x} intercept of vertical reference line, if desired.
 #' @param clinsig Set the clinical significance level. Rows are marked with a
 #'   dagger if they have one or more thresholds less than this value. Not set by
 #'   default.

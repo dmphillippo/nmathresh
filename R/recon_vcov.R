@@ -7,11 +7,11 @@
 #'
 #' @param post Posterior covariance matrix.
 #' @param prior.prec Prior precision. Defaults to .0001 which is a common flat
-#'   prior for NMA. Not used if prior.vcov is specified.
+#'   prior for NMA. Not used if \code{prior.vcov} is specified.
 #' @param prior.vcov Prior covariance matrix. Defaults to a diagonal matrix of
-#'   the same size as post, with elements 1/prior.prec.
+#'   the same size as post, with elements \code{1/prior.prec}.
 #' @param X Contrast design matrix. If omitted a complete network is assumed.
-#' @param verbose Print intermediate matrices? Defaults to FALSE.
+#' @param verbose Print intermediate matrices? Defaults to \code{FALSE}.
 #'
 #' @details Full details of the calculation are given by Phillippo \emph{et al.}
 #'   (2017). Briefly, the aim is to recover the contrast-level

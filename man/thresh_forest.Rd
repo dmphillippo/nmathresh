@@ -61,9 +61,9 @@ Interval".}
 3.}
 
 \item{digits}{Number of decimal places to display in the table. Overrides
-sigfig if set.}
+\code{sigfig} if set.}
 
-\item{refline}{x intercept of vertical reference line, if desired.}
+\item{refline}{\eqn{x} intercept of vertical reference line, if desired.}
 
 \item{clinsig}{Set the clinical significance level. Rows are marked with a
 dagger if they have one or more thresholds less than this value. Not set by
