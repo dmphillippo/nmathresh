@@ -28,7 +28,7 @@
 #' @describeIn d_ab2i Convert \code{d[i]} type indices to \eqn{d_{ab}} type indices.
 #'
 d_ab2i <- function(a, b, K) {
-  stopifnot(b>a, a<K, b<=K, a>=1, b>=2, length(a)==length(b))
+  stopifnot(b>a, a<K, b<=K, a>=1, b>=2, length(a)==length(b), length(K)==1, K==trunc(K))
 
   #sum(1:(K-1)) - sum(1:(K-a[i])) + (b-a)
   sum(1:(K-1)) - sapply((sapply(K-a, seq, from=1)), sum) + (b-a)
@@ -41,6 +41,7 @@ d_i2ab <- function(i, K) {
   if (any(i > K*(K-1)/2)) {
     stop("Index i is greater than the total number of contrasts K(K-1)/2")
   }
+  if (length(K) != 1 || K != trunc(K)) stop("K should be a single integer.")
 
   # Generate "triangular" numbers
   tri <- lower.tri(matrix(nrow=K-1, ncol=K-1), diag=T) %*% (K-1):1
