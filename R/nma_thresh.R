@@ -84,14 +84,14 @@
 #' @section Decision rules:
 #'
 #'   The default decision rule is maximal efficacy; the optimal treatment is
-#'   \eqn{ k^* = \mathrm{argmax}_k \mathbb{E}(d_{k})}{k* = argmax(E(d_k))}.
+#'   \eqn{ k^* = \mathrm{argmax}_k \mathrm{E}(d_{k})}{k* = argmax(E(d_k))}.
 #'
 #'   When \eqn{\epsilon} = \code{mcid} is greater than zero and
 #'   \code{mcid.type = 'decision'}, the decision rule is no longer for a single
 #'   best treatment, but is based on minimal clinically important difference. A
-#'   treatment is in the optimal set if \eqn{\mathbb{E}(d_k) \ge
-#'   \epsilon}{E(d_k) \ge \epsilon} and \eqn{\max_a \mathbb{E}(d_a) -
-#'   \mathbb{E}(d_k) \le \epsilon}{max E(d_a) - E(d_k) \le \epsilon}.
+#'   treatment is in the optimal set if \eqn{\mathrm{E}(d_k) \ge
+#'   \epsilon}{E(d_k) \ge \epsilon} and \eqn{\max_a \mathrm{E}(d_a) -
+#'   \mathrm{E}(d_k) \le \epsilon}{max E(d_a) - E(d_k) \le \epsilon}.
 #'
 #'   When \code{mcid.type = 'change'}, the maximal efficacy rule is used, but
 #'   thresholds are found for when a new treatment is better than the base-case
