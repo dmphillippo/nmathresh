@@ -1,9 +1,7 @@
 #' Convert contrast indexing
 #'
 #' Functions for converting between \eqn{d_{ab}} indexing of contrasts (useful
-#' notationally) and \code{d[i]} indexing used by R. These functions are largely
-#' intended for use internally by the \code{nmathresh} package, but may be of
-#' use to the advanced user.
+#' notationally) and \code{d[i]} indexing used by R.
 #'
 #' @param a Vector of treatment codes \eqn{a}.
 #' @param b Vector of treatment codes \eqn{b}.

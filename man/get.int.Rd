@@ -36,6 +36,7 @@ Data frame of thresholds and new optimal treatments with columns
   \code{lo}, \code{lo.newkstar}, \code{hi}, and \code{hi.newkstar}.
 }
 \description{
-This function is intended for internal use only, and is called by
-\code{nma_thresh} automatically.
+Return the positive and negative thresholds for an observation, given a
+vector of possible threshold solutions. This function is intended for
+internal use, and is called by \code{nma_thresh} automatically.
 }

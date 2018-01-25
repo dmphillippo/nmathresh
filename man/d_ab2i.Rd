@@ -25,9 +25,7 @@ d_i2ab(i, K)
 }
 \description{
 Functions for converting between \eqn{d_{ab}} indexing of contrasts (useful
-notationally) and \code{d[i]} indexing used by R. These functions are largely
-intended for use internally by the \code{nmathresh} package, but may be of
-use to the advanced user.
+notationally) and \code{d[i]} indexing used by R.
 }
 \section{Functions}{
 \itemize{

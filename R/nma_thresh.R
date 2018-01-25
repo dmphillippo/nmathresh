@@ -425,8 +425,9 @@ nma_thresh <- function(mean.dk, lhood, post,
 
 #' Get thresholds from U matrix
 #'
-#' This function is intended for internal use only, and is called by
-#' \code{nma_thresh} automatically.
+#' Return the positive and negative thresholds for an observation, given a
+#' vector of possible threshold solutions. This function is intended for
+#' internal use, and is called by \code{nma_thresh} automatically.
 #'
 #' @param x Column of \eqn{U} matrix, containing all possible threshold
 #'   solutions for a data point.
