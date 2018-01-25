@@ -49,7 +49,7 @@ print.thresh <- function(x, n = 6L, ...){
   cat("A thresh object. For help, see ?'thresh-class'.\n\n")
 
   if (x$call$trt.rank == 1) {
-    cat("Base-case optimal treatment is k* = ", x$kstar, ".\n\n", sep = "")
+    cat("Base-case optimal treatment is k* = ", paste0(x$kstar, collapse = ", "), ".\n\n", sep = "")
   } else {
     cat("Base-case rank ", x$call$trt.rank, " treatment is k* = ",
         x$kstar, ".\n\n", sep = "")

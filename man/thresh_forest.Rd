@@ -10,7 +10,10 @@ thresh_forest(thresh, y, CI.lo, CI.hi, label, orderby = NULL, data = NULL,
   xlim = NULL, sigfig = 3, digits = NULL, refline = NULL,
   clinsig = NULL, cutoff = NULL, II.colw = rgb(0.72, 0.8, 0.93),
   II.cols = rgb(0.93, 0.72, 0.8), II.lwd = 8, CI.lwd = 1, pointsize = 4,
-  fontsize = 12, xbreaks = NULL, calcdim = display, display = TRUE)
+  fontsize = 12, xbreaks = NULL, add.columns = NULL,
+  add.columns.title = NULL, add.columns.after = -1,
+  add.columns.hjust = 0.5, add.columns.uline = TRUE, calcdim = display,
+  display = TRUE)
 }
 \arguments{
 \item{thresh}{A \code{thresh} object, as produced by
@@ -58,9 +61,9 @@ Interval".}
 3.}
 
 \item{digits}{Number of decimal places to display in the table. Overrides
-sigfig if set.}
+\code{sigfig} if set.}
 
-\item{refline}{x intercept of vertical reference line, if desired.}
+\item{refline}{\eqn{x} intercept of vertical reference line, if desired.}
 
 \item{clinsig}{Set the clinical significance level. Rows are marked with a
 dagger if they have one or more thresholds less than this value. Not set by
@@ -84,6 +87,22 @@ be cut off and marked as NT (no threshold). Not set by default.}
 
 \item{xbreaks}{Position of tick marks on the \eqn{x}-axis as a numeric
 vector.}
+
+\item{add.columns}{Data frame (or matrix, vector) of additional columns to
+add to table.}
+
+\item{add.columns.title}{Optional titles for the additional columns,
+otherwise use names from provided data.}
+
+\item{add.columns.after}{Which column to add the new columns after? Default
+adds the columns to the far right.}
+
+\item{add.columns.hjust}{Vector of horizontal justifications for the new
+columns, from \code{0} (left) to \code{1} (right). Default centres every
+column.}
+
+\item{add.columns.uline}{Underline the header of the new columns? Default
+\code{TRUE}.}
 
 \item{calcdim}{Logical, calculate suggested output dimensions for saving to
 pdf? Calculates output size when \code{TRUE}; saves time when \code{FALSE}.}

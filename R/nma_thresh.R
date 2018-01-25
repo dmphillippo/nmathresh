@@ -15,22 +15,27 @@
 #'   abbreviated.
 #' @param X [FE models only] Design matrix for basic treatment parameters.
 #' @param mu.design [RE models only] Design matrix for any extra parameters.
-#'   Defaults to NULL (no extra parameters).
+#'   Defaults to \code{NULL} (no extra parameters).
 #' @param delta.design [RE models only] Design matrix for delta, defaults to the
 #'   \eqn{N \times N}{N x N} identity matrix.
 #' @param opt.max Should the optimal decision be the maximal treatment effect
-#'   (TRUE, default) or the minimum (FALSE).
+#'   (\code{TRUE}, default) or the minimum (\code{FALSE}).
 #' @param trt.rank Rank of the treatment to derive thresholds for. Defaults to
 #'   1, thresholds for the optimum treatment.
-#' @param trt.code Treatment codings of the reference trt and in the parameter
-#'   vector \eqn{d_k}. Use if treatments re-labelled or re-ordered. Default is
-#'   equivalent to 1:K.
+#' @param trt.code Treatment codings of the reference treatment and in the
+#'   parameter vector \eqn{d_k}. Use if treatments re-labelled or re-ordered.
+#'   Default is equivalent to \code{1:K}.
 #' @param trt.sub Only look at thresholds in this subset of treatments in
-#'   trt.code, e.g. if some are excluded from the ranking. Default is equivalent
-#'   to 1:K.
-#' @param mcid.new Consider changing the decision to an alternative treatment
-#'   only when it is more effective than the base-case optimal treatment by this
-#'   minimal clinically important difference. Defaults to 0.
+#'   \code{trt.code}, e.g. if some are excluded from the ranking. Default is
+#'   equivalent to \code{1:K}.
+#' @param mcid Minimal clinically important difference for the decision (when
+#'   \code{mcid.type = 'decision'}) or for changing the decision (when
+#'   \code{mcid.type = 'change'}). Defaults to 0, use the maximal efficacy
+#'   decision rule.
+#' @param mcid.type Default \code{'decision'}, the decision rule is based on
+#'   MCID (see details). Otherwise \code{'change'}, use the maximum efficacy
+#'   rule, but only consider changing the decision when the alternative
+#'   treatment becomes more effective than the base case by \code{mcid} or more.
 #'
 #' @details This function provides bias-adjustment threshold analysis for both
 #'   fixed and random effects NMA models, as described by Phillippo \emph{et
@@ -76,6 +81,22 @@
 #'   sensible prior. In the RE case, the threshold derivations make the
 #'   approximation that \eqn{\tau^2} is fixed and known.
 #'
+#' @section Decision rules:
+#'
+#'   The default decision rule is maximal efficacy; the optimal treatment is
+#'   \eqn{ k^* = \mathrm{argmax}_k \mathrm{E}(d_{k})}{k* = argmax(E(d_k))}.
+#'
+#'   When \eqn{\epsilon} = \code{mcid} is greater than zero and
+#'   \code{mcid.type = 'decision'}, the decision rule is no longer for a single
+#'   best treatment, but is based on minimal clinically important difference. A
+#'   treatment is in the optimal set if \eqn{\mathrm{E}(d_k) \ge
+#'   \epsilon}{E(d_k) \ge \epsilon} and \eqn{\max_a \mathrm{E}(d_a) -
+#'   \mathrm{E}(d_k) \le \epsilon}{max E(d_a) - E(d_k) \le \epsilon}.
+#'
+#'   When \code{mcid.type = 'change'}, the maximal efficacy rule is used, but
+#'   thresholds are found for when a new treatment is better than the base-case
+#'   optimal by at least \code{mcid}.
+#'
 #' @return An object of class \code{thresh}.
 #' @seealso \code{\link{recon_vcov}}, \code{\link{thresh_forest}},
 #'   \code{\link{thresh-class}}.
@@ -117,7 +138,7 @@ nma_thresh <- function(mean.dk, lhood, post,
                        X=NULL,
                        mu.design=NULL, delta.design=diag(nrow=dim(lhood)),
                        opt.max=TRUE, trt.rank=1, trt.code=NULL, trt.sub=NULL,
-                       mcid.new=0) {
+                       mcid=0, mcid.type='decision') {
 
 
 ## Basic parameter checks --------------------------------------------------
@@ -211,29 +232,29 @@ nma_thresh <- function(mean.dk, lhood, post,
     stop("trt.rank is larger than the length of trt.sub")
   }
 
-  # mcid.new should be a single non-negative numeric value
-  if (!is.numeric(mcid.new) | length(mcid.new) != 1 | mcid.new < 0) {
-    stop("mcid.new should be a single non-negative numeric value")
+  # mcid should be a single non-negative numeric value
+  if (!is.numeric(mcid) | length(mcid) != 1 | mcid < 0) {
+    stop("mcid should be a single non-negative numeric value")
+  }
+
+  # Check mcid.type
+  mcid.type <- match.arg(mcid.type, c('decision', 'change'))
+
+  # Can't use mcid decision rule and treatment ranks
+  if (mcid > 0 & mcid.type == 'decision' & trt.rank > 1) {
+    stop("Can't use mcid decision rule and trt.rank at the same time.")
   }
 
 
 ## Pre-processing ----------------------------------------------------------
 
+  # Get contrast details
+  d_ab <- d_i2ab(1:(K*(K-1)/2), K)
+
   # Create contrast "design" matrix
-  D <- matrix(nrow=K*(K-1)/2, ncol=K-1)
-  j <- 1
-  for (i in 1:(K-1)) {
-    if (i == 1) {
-      D[j:(j+K-i-1),] <- diag(nrow=K-i)
-    } else if (i == 2) {
-       D[j:(j+K-i-1),] <- cbind(rep.int(-1,K-i), diag(nrow=K-i))
-    } else {
-      D[j:(j+K-i-1),] <- cbind(matrix(rep.int(0, (K-i)*(i-2)), ncol=i-2),
-                               rep.int(-1, K-i),
-                               diag(nrow=K-i))
-    }
-    j <- j+K-i
-  }
+  D <- matrix(0, nrow=K*(K-1)/2, ncol=K-1)
+  D[cbind(1:nrow(D), d_ab$a - 1)] <- -1
+  D[cbind(1:nrow(D), d_ab$b - 1)] <- 1
 
   # Create vector of contrasts d_ab
   contr <- as.vector(D %*% mean.dk)
@@ -270,15 +291,32 @@ nma_thresh <- function(mean.dk, lhood, post,
 
   }
 
+  # Add row names to H matrix (inflmat)
+  rownames(inflmat) <- paste0("d[", trt.code[2:K], "]")
+
 
 ## Derive solution matrix U -------------------------------------------------
 
-  threshmat <- sweep(1 / (D %*% inflmat), 1, -contr - sign(contr)*mcid.new, "*")
+  if (mcid > 0 & mcid.type == 'change') {
+    threshmat <- sweep(1 / (D %*% inflmat), 1, -contr - sign(contr)*mcid, "*")
 
-  # Note: For mcid.new > 0, if a contrast is negative, we want a new decision
-  # when the contrast is > +mcid.new. If a contrast is positive, we want a new
-  # decision when the contrast is < -mcid.new. In other words, the contrast has
-  # to be overturned by an extra mcid.new amount.
+    ## -- For mcid.type = "change" --
+    # For mcid > 0, if a contrast is negative, we want a new decision when the
+    # contrast is > +mcid. If a contrast is positive, we want a new decision
+    # when the contrast is < -mcid. In other words, the contrast has to be
+    # overturned by an extra mcid.new amount.
+  } else {
+    threshmat <- sweep(1 / (D %*% inflmat), 1, -contr + sign(contr)*mcid, "*")
+
+    ## -- For mcid.type = "decision" --
+    # And also for standard maximal efficacy rule, when mcid = 0 anyway.
+    # For mcid > 0, if a contrast is negative, we want to know when the
+    # contrast is = -mcid. If a contrast is positive, we want to know when
+    # the contrast is = +mcid
+  }
+
+  # Add row names to U matrix (threshmat)
+  rownames(threshmat) <- paste0("d[", trt.code[d_ab$a], ",", trt.code[d_ab$b], "]")
 
   # Now we only need to look at contrasts involving the optimal treatment k*
   # Updated to handle trt.rank, to pick out other ranked treatments than the
@@ -286,44 +324,68 @@ nma_thresh <- function(mean.dk, lhood, post,
   # Updated to handle trt.sub, only look for k* in a subset of treatments.
 
   mean.dk.subNA <- mean.dk
-  mean.dk.subNA[!(1:(K-1) %in% (trt.sub.internal - 1))] <- NA
+  mean.dk.subNA[!(1:(K - 1) %in% (trt.sub.internal - 1))] <- NA
 
-  if (opt.max){
-    kstar <- order(c(0, mean.dk.subNA), decreasing=TRUE)[trt.rank]
-  } else if (!opt.max){
-    kstar <- order(c(0, mean.dk.subNA), decreasing=FALSE)[trt.rank]
+  if (opt.max) {
+    if (mcid > 0 & mcid.type == 'decision') {
+      kstar <- which(mean.dk.subNA >= mcid & max(mean.dk.subNA, na.rm = TRUE) - mean.dk.subNA <= mcid) + 1
+    } else {
+      kstar <- order(c(0, mean.dk.subNA), decreasing = TRUE)[trt.rank]
+    }
+  } else if (!opt.max) {
+    if (mcid > 0 & mcid.type == 'decision') {
+      kstar <- which(mean.dk.subNA <= -mcid & min(mean.dk.subNA, na.rm = TRUE) - mean.dk.subNA >= -mcid) + 1
+    } else {
+      kstar <- order(c(0, mean.dk.subNA), decreasing = FALSE)[trt.rank]
+    }
   }
 
-  if (trt.rank == 1) {
+  if (mcid > 0 & mcid.type == 'decision') {
+    message("Current optimal treatment set is k* = ", paste(trt.code[kstar], collapse = ", "), ".")
+  } else if (trt.rank == 1) {
     message("Current optimal treatment is k* = ", trt.code[kstar], ".")
   } else {
     message("Current rank ", trt.rank, " treatment is k = ", trt.code[kstar], ".")
   }
 
-  # And these contrasts have non-zero elements in the contrast design matrix D
-  if (kstar > 1) {
-    contr.kstar <- which(D[,kstar-1] != 0)
+  # Which rows of U correspond to treatments in kstar?
+  # We also only want contrasts involving treatments in trt.sub.
+  if (mcid > 0 & mcid.type == 'decision') {
+    # If using MCID decision rule, we do want thresholds for contrasts between treatments in kstar
+    contr.kstar <- which((d_ab$a %in% kstar & d_ab$b %in% trt.sub.internal) |
+                           (d_ab$b %in% kstar & d_ab$a %in% trt.sub.internal))
   } else {
-    contr.kstar <- 1:(K-1)
+    # Otherwise we don't care about switches within kstar, so only one of a or b can be in kstar (xor).
+    contr.kstar <- which(xor(d_ab$a %in% kstar, d_ab$b %in% kstar) &
+                           d_ab$a %in% trt.sub.internal &
+                           d_ab$b %in% trt.sub.internal)
   }
 
   # So we look in the corresponding rows of the threshold matrix
-  threshmat.kstar <- threshmat[contr.kstar,]
+  threshmat.kstar <- threshmat[contr.kstar, , drop = FALSE]
 
 
 ## Derive thresholds -------------------------------------------------------
 
-  # Only look in rows which correspond to contrasts with treatments in trt.sub
-  contr.trt.sub <- trt.sub.internal[-which(trt.sub.internal == kstar)] -
-    (trt.sub.internal[-which(trt.sub.internal == kstar)] >= kstar)*1
+  # Split threshmat and inflmat into a list of columns to mapply over
+  threshmat.list <- lapply(seq_len(ncol(threshmat.kstar)), function(i) threshmat.kstar[,i])
+  inflmat.list <- lapply(seq_len(ncol(inflmat)), function(i) inflmat[,i])
 
-    thresholds <- as.data.frame(
-      do.call(rbind,
-              apply(threshmat.kstar[contr.trt.sub, , drop = FALSE], 2,
-                    get.int, kstar, trt.code, trt.sub
-                    )
-              )
-      )
+  # Get thresholds for each data point
+  thresholds <- as.data.frame(
+    do.call(rbind,
+            mapply(get.int,
+                   x = threshmat.list,
+                   inflmat = inflmat.list,
+                   MoreArgs = list(
+                     kstar = kstar,
+                     trt.code = trt.code,
+                     contrs = d_ab[contr.kstar,],
+                     mcid = mcid.type == "decision" & mcid > 0,
+                     mean.dk = mean.dk,
+                     opt.max = opt.max
+                     ),
+                   SIMPLIFY = FALSE)))
 
 
 ## Return thresh object ----------------------------------------------------
@@ -345,7 +407,8 @@ nma_thresh <- function(mean.dk, lhood, post,
            trt.rank = trt.rank,
            trt.code = trt.code,
            trt.sub = trt.sub,
-           mcid.new = mcid.new
+           mcid = mcid,
+           mcid.type = mcid.type
            )
          ),
     class="thresh")
@@ -362,55 +425,187 @@ nma_thresh <- function(mean.dk, lhood, post,
 
 #' Get thresholds from U matrix
 #'
-#' This function is intended for internal use only, and is called by
-#' \code{nma_thresh} automatically.
+#' Return the positive and negative thresholds for an observation, given a
+#' vector of possible threshold solutions. This function is intended for
+#' internal use, and is called by \code{nma_thresh} automatically.
 #'
 #' @param x Column of \eqn{U} matrix, containing all possible threshold
 #'   solutions for a data point.
 #' @param kstar Base-case optimal treatment.
 #' @param trt.code Vector of (possibly recoded) treatments. See
 #'   \code{nma_thresh} parameter of the same name.
-#' @param trt.sub Vector of treatment indices, subset of trt.code, to consider.
-#'   See \code{nma_thresh} parameter of the same name.
+#' @param contrs Details of contrasts corresponding to rows in \code{x},
+#'   as rows of the data.frame output by \code{d_i2ab}.
+#' @param mcid Use MCID decision rule? Default \code{FALSE}.
+#' @param mean.dk Posterior means of basic treatment parameters, required when
+#'   \code{mcid} is \code{TRUE}.
+#' @param inflmat Column of influence matrix \eqn{H} for the data point,
+#'   required when \code{mcid} is \code{TRUE}.
+#' @param opt.max Is the maximum treatment effect optimal? See
+#'   \code{nma_thresh} parameter of same name. Required when \code{mcid} is
+#'   \code{TRUE}.
 #'
 #' @return Data frame of thresholds and new optimal treatments with columns
 #'   \code{lo}, \code{lo.newkstar}, \code{hi}, and \code{hi.newkstar}.
 #' @export
 #'
-get.int <- function(x, kstar, trt.code, trt.sub) {
+get.int <- function(x, kstar, trt.code, contrs, mcid = FALSE,
+                    mean.dk = NULL, inflmat = NULL, opt.max = NULL) {
 
-  trt.sub.internal <- which(trt.code %in% trt.sub)
-
-  # If both thresholds are infinite
-  if (all(is.infinite(x))) {
-    hi <- Inf
-    lo <- -Inf
-    hi.newkstar <- lo.newkstar <- NA
-
-  # If lower threshold is infinite
-  } else if (all(x[!is.infinite(x)] > 0)) {
-    hi <- min(x[!is.infinite(x)])
-    hi.newkstar <-
-      trt.code[trt.sub.internal[which(x==hi) + (which(x==hi) >= which(trt.sub.internal==kstar))*1]]
-    lo <- -Inf
-    lo.newkstar <- NA
-
-  # If upper threshold is infinite
-  } else if (all(x[!is.infinite(x)] < 0)) {
-    hi <- Inf
-    hi.newkstar <- NA
-    lo <- max(x[!is.infinite(x)])
-    lo.newkstar <-
-      trt.code[trt.sub.internal[which(x==lo) + (which(x==lo) >= which(trt.sub.internal==kstar))*1]]
-
-  # If neither threshold is infinite
-  } else {
-    hi <- min(x[x>0 & !is.infinite(x)])
-    hi.newkstar <-
-      trt.code[trt.sub.internal[which(x==hi) + (which(x==hi) >= which(trt.sub.internal==kstar))*1]]
-    lo <- max(x[x<0 & !is.infinite(x)])
-    lo.newkstar <-
-      trt.code[trt.sub.internal[which(x==lo) + (which(x==lo) >= which(trt.sub.internal==kstar))*1]]
+  # Basic parameter checks
+  if (mcid == TRUE & (is.null(mean.dk) | is.null(opt.max) | is.null(inflmat))) {
+    stop("Provide mean.dk, inflmat, and opt.max when mcid = TRUE")
   }
-  return(data.frame(lo=lo,lo.newkstar=lo.newkstar,hi=hi,hi.newkstar=hi.newkstar))
+
+  # Using standard decision rule
+  if (mcid == FALSE & length(kstar) == 1) {
+    # If both thresholds are infinite
+    if (all(is.infinite(x))) {
+      hi <- Inf
+      lo <- -Inf
+      hi.newkstar <- lo.newkstar <- NA_character_
+
+    # If lower threshold is infinite
+    } else if (all(x[!is.infinite(x)] > 0)) {
+      hi <- min(x[!is.infinite(x)])
+      i.hi <- which(x == hi)
+      hi.newkstar <- trt.code[contrs[i.hi, contrs[i.hi, ] != kstar]]
+      lo <- -Inf
+      lo.newkstar <- NA_character_
+
+    # If upper threshold is infinite
+    } else if (all(x[!is.infinite(x)] < 0)) {
+      hi <- Inf
+      hi.newkstar <- NA_character_
+      lo <- max(x[!is.infinite(x)])
+      i.lo <- which(x == lo)
+      lo.newkstar <- trt.code[contrs[i.lo, contrs[i.lo, ] != kstar]]
+
+    # If neither threshold is infinite
+    } else {
+      hi <- min(x[x > 0 & !is.infinite(x)])
+      i.hi <- which(x == hi)
+      hi.newkstar <- trt.code[contrs[i.hi, contrs[i.hi, ] != kstar]]
+      lo <- max(x[x < 0 & !is.infinite(x)])
+      i.lo <- which(x == lo)
+      lo.newkstar <- trt.code[contrs[i.lo, contrs[i.lo, ] != kstar]]
+    }
+  } else if (mcid == TRUE) {
+    # Using MCID decision rule
+    # Thresholds fit one of two criteria:
+    #   1. Either d_1k = mcid, or
+    #   2. d_ak* = mcid, where k* is the maximally effective treatment at the threshold
+    # For d_ab contrasts there is no threshold if b is not the most effective.
+    # We shall step along the solution vector to check these criteria.
+
+    # Vector of treatments (possibly subset)
+    dk <- sort(unique(c(contrs$a, contrs$b)))
+
+    # First, negative thresholds
+    i.neg <- order(x[x < 0 & !is.infinite(x)], decreasing = TRUE)
+    if (length(i.neg) == 0) {
+      # No negative threshold
+      lo <- -Inf
+      lo.newkstar <- NA_character_
+
+    } else {
+      x.neg <- x[x < 0 & !is.infinite(x)][i.neg]
+      ab.neg <- contrs[x < 0 & !is.infinite(x),][i.neg,]
+
+      for (i in 1:length(i.neg)) {
+        if (ab.neg[i, "a"] == 1) {
+          # Treatment has dropped below MCID
+          lo <- x.neg[i]
+          lo.newkstar <- trt.code[setdiff(kstar, ab.neg[i, "b"])]
+          break
+        } else {
+          # Evaluate treatment effects at threshold
+          d.thr <- c(0, mean.dk + x.neg[i] * inflmat)[dk]
+
+          # Which is the best?
+          if (opt.max) kstar.thr <- dk[d.thr == max(d.thr)]
+          else kstar.thr <- dk[d.thr == min(d.thr)]
+
+          # Does the contrast involve the best treatment?
+          if (any(ab.neg[i,] == kstar.thr)) {
+            # If both treatments were in kstar, one has dropped out
+            if (all(ab.neg[i,] %in% kstar)) {
+              lo <- x.neg[i]
+              lo.newkstar <- trt.code[setdiff(kstar, setdiff(ab.neg[i,], kstar.thr))]
+              break
+            } else {
+              # Otherwise, another has joined kstar
+              lo <- x.neg[i]
+              lo.newkstar <- trt.code[sort(c(kstar, setdiff(ab.neg[i,], kstar.thr), recursive = TRUE))]
+              break
+            }
+          }
+          # Otherwise continue, no threshold
+        }
+        # If we have reached the end of the loop, no threshold found
+        if (i == length(i.neg)) {
+          lo <- -Inf
+          lo.newkstar <- NA_character_
+        }
+      }
+    }
+
+    # Now positive thresholds
+    i.pos <- order(x[x > 0 & !is.infinite(x)], decreasing = FALSE)
+    if (length(i.pos) == 0) {
+      # No positive threshold
+      hi <- Inf
+      hi.newkstar <- NA_character_
+
+    } else {
+      x.pos <- x[x > 0 & !is.infinite(x)][i.pos]
+      ab.pos <- contrs[x > 0 & !is.infinite(x),][i.pos,]
+
+      for (i in 1:length(i.pos)) {
+        if (ab.pos[i, "a"] == 1) {
+          # Treatment has dropped below MCID
+          hi <- x.pos[i]
+          hi.newkstar <- trt.code[setdiff(kstar, ab.pos[i, "b"])]
+          break
+        } else {
+          # Evaluate treatment effects at threshold
+          d.thr <- c(0, mean.dk + x.pos[i] * inflmat)[dk]
+
+          # Which is the best?
+          if (opt.max) kstar.thr <- dk[d.thr == max(d.thr)]
+          else kstar.thr <- dk[d.thr == min(d.thr)]
+
+          # Does the contrast involve the best treatment?
+          if (any(ab.pos[i,] == kstar.thr)) {
+            # If both treatments were in kstar, one has dropped out
+            if (all(ab.pos[i,] %in% kstar)) {
+              hi <- x.pos[i]
+              hi.newkstar <- trt.code[setdiff(kstar, setdiff(ab.pos[i,], kstar.thr))]
+              break
+            } else {
+              # Otherwise, another has joined kstar
+              hi <- x.pos[i]
+              hi.newkstar <- trt.code[sort(c(kstar, setdiff(ab.pos[i,], kstar.thr), recursive = TRUE))]
+              break
+            }
+          }
+          # Otherwise continue, no threshold
+        }
+        # If we have reached the end of the loop, no threshold found
+        if (i == length(i.pos)) {
+          hi <- Inf
+          hi.newkstar <- NA_character_
+        }
+      }
+    }
+  }
+
+  thresholds <- data.frame(lo = lo,
+                           lo.newkstar = paste0(lo.newkstar, collapse = ", "),
+                           hi = hi,
+                           hi.newkstar = paste0(hi.newkstar, collapse = ", "),
+                           stringsAsFactors = FALSE)
+  rownames(thresholds) <- NULL
+
+  return(thresholds)
 }
