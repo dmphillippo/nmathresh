@@ -23,24 +23,24 @@ abbreviated.}
 \item{X}{[FE models only] Design matrix for basic treatment parameters.}
 
 \item{mu.design}{[RE models only] Design matrix for any extra parameters.
-Defaults to NULL (no extra parameters).}
+Defaults to \code{NULL} (no extra parameters).}
 
 \item{delta.design}{[RE models only] Design matrix for delta, defaults to the
 \eqn{N \times N}{N x N} identity matrix.}
 
 \item{opt.max}{Should the optimal decision be the maximal treatment effect
-(TRUE, default) or the minimum (FALSE).}
+(\code{TRUE}, default) or the minimum (\code{FALSE}).}
 
 \item{trt.rank}{Rank of the treatment to derive thresholds for. Defaults to
 1, thresholds for the optimum treatment.}
 
-\item{trt.code}{Treatment codings of the reference trt and in the parameter
-vector \eqn{d_k}. Use if treatments re-labelled or re-ordered. Default is
-equivalent to 1:K.}
+\item{trt.code}{Treatment codings of the reference treatment and in the
+parameter vector \eqn{d_k}. Use if treatments re-labelled or re-ordered.
+Default is equivalent to \code{1:K}.}
 
 \item{trt.sub}{Only look at thresholds in this subset of treatments in
-trt.code, e.g. if some are excluded from the ranking. Default is equivalent
-to 1:K.}
+\code{trt.code}, e.g. if some are excluded from the ranking. Default is
+equivalent to \code{1:K}.}
 
 \item{mcid}{Minimal clinically important difference for the decision (when
 \code{mcid.type = 'decision'}) or for changing the decision (when
