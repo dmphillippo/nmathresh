@@ -1,3 +1,6 @@
+## Resubmission
+This is a resubmission. In this version I have changed the brackets around the DOI in DESCRIPTION to <>.
+
 ## Test environments
 * local windows install, R 3.4.3
 * win-builder (devel, release, and oldrelease)
@@ -18,7 +21,7 @@ Possibly mis-spelled words in DESCRIPTION:
   et (8:15)
 
 This is my first CRAN submission. The spell check NOTE is for a reference to the published paper
-> Phillippo et al. (2017) [doi:10.1111/rssa.12341]
+> Phillippo et al. (2017) <doi:10.1111/rssa.12341>
 
 ## Downstream dependencies
 There are currently no downstream dependencies for this package.

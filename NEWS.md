@@ -1,3 +1,7 @@
+# nmathresh 0.1.1
+
+* Fix DOI brackets in DESCRIPTION for CRAN.
+
 # nmathresh 0.1.0
 
 * Feature: Provide additional columns in the table produced by `thresh_forest` using argument `add.columns`.
