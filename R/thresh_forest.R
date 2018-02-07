@@ -197,7 +197,7 @@ thresh_forest <- function(thresh,
 
   # Set up xlim and xbreaks
   if (is.null(xbreaks)) {
-    if(is.null(xlim)) xbreaks <- pretty(c(min(CI.lo), max(CI.hi)))
+    if(is.null(xlim)) xbreaks <- pretty(c(min(CI.lo, na.rm = TRUE), max(CI.hi, na.rm = TRUE)))
     else xbreaks <- pretty(xlim)
   }
 
@@ -208,6 +208,10 @@ thresh_forest <- function(thresh,
   # Invariant interval
   pd$II.lo <- pd$y + pd$lo
   pd$II.hi <- pd$y + pd$hi
+
+  # If y and lo/hi are infinite, reset II limit to Inf (not NaN)
+  pd$II.lo[is.infinite(pd$y) & is.infinite(pd$lo)] <- -Inf
+  pd$II.hi[is.infinite(pd$y) & is.infinite(pd$hi)] <- Inf
 
 
   # Function to print with significant digits or decimal places
@@ -220,8 +224,8 @@ thresh_forest <- function(thresh,
 
   # Present CIs
   for (i in 1:N) {
-    pd[i, "CI.txt"] <- paste0("(", printsig(pd[i, "CI.lo"]), ", ",
-                                  printsig(pd[i, "CI.hi"]), ")")
+    pd[i, "CI.txt"] <- paste0("(", ifelse(is.na(pd[i, "CI.lo"]), "\u2013", printsig(pd[i, "CI.lo"])), ", ",
+                              ifelse(is.na(pd[i, "CI.hi"]), "\u2013", printsig(pd[i, "CI.hi"])), ")")
   }
 
 	# Format means
@@ -238,7 +242,7 @@ thresh_forest <- function(thresh,
   pd$hi.newkstar[is.na(pd$hi.newkstar) | pd$II.hi >= cutoff[2]] <- "\u2013"
 
   # Get details of short (statistically insignificant) intervals
-  pd$is.short <- pd$II.lo > pd$CI.lo | pd$II.hi < pd$CI.hi
+  pd$is.short <- (!is.na(pd$CI.lo) & pd$II.lo > pd$CI.lo) | (!is.na(pd$CI.hi) & pd$II.hi < pd$CI.hi)
   pd$lab.ff <- ifelse(pd$is.short, "bold", "plain")
 
   # Get details of clinically insignificant intervals
@@ -481,12 +485,25 @@ forestgrob <- function(y,
                        CI.lo, CI.hi, II.lo, II.hi,
                        xlim, CI.lwd, II.cols, II.colw, II.lwd, pointsize){
 
-  # Truncate CIs, IIs if necessary
-  tCI.lo <- max(CI.lo, xlim[1])
-  istCI.lo <- CI.lo < xlim[1]
+  # If y is infinite/NA then nothing is defined, return empty gTree
+  if (is.infinite(y) || is.na(y)) return(grobTree(NULL))
 
-  tCI.hi <- min(CI.hi, xlim[2])
-  istCI.hi <- CI.hi > xlim[2]
+  # Truncate CIs, IIs if necessary
+  if (is.na(CI.lo)) {
+    tCI.lo <- NA
+    istCI.lo <- FALSE
+  } else {
+    tCI.lo <- max(CI.lo, xlim[1])
+    istCI.lo <- CI.lo < xlim[1]
+  }
+
+  if (is.na(CI.hi)) {
+    tCI.hi <- NA
+    istCI.hi <- FALSE
+  } else {
+    tCI.hi <- min(CI.hi, xlim[2])
+    istCI.hi <- CI.hi > xlim[2]
+  }
 
   tII.lo <- max(II.lo, xlim[1])
   istII.lo <- II.lo < xlim[1]
@@ -506,12 +523,12 @@ forestgrob <- function(y,
                     unit(c(0, hlwd, 0, hlwd, 0), units = "pt"),
                   y = unit(rep(0.5, 5), units = "npc") +
                     unit(c(hlwd, hlwd, 0, -hlwd, -hlwd), units = "pt"),
-                  gp = gpar(lwd = NA, fill = ifelse(II.lo >= CI.lo, II.cols, II.colw)))
+                  gp = gpar(lwd = NA, fill = ifelse(!is.na(CI.lo) && II.lo >= CI.lo, II.cols, II.colw)))
     } else {
       polygonGrob(x = x2c(c(y, tII.lo, tII.lo, y), xlim),
                   y = unit(rep(0.5, 4), units = "npc") +
                     unit(c(hlwd, hlwd, -hlwd, -hlwd), units = "pt"),
-                  gp = gpar(lwd = NA, fill = ifelse(II.lo >= CI.lo, II.cols, II.colw)))
+                  gp = gpar(lwd = NA, fill = ifelse(!is.na(CI.lo) && II.lo >= CI.lo, II.cols, II.colw)))
     }},
 
     # Invariant interval, upper
@@ -521,12 +538,12 @@ forestgrob <- function(y,
                     unit(c(0, -hlwd, 0, -hlwd, 0), units = "pt"),
                   y = unit(rep(0.5, 5), units = "npc") +
                     unit(c(hlwd, hlwd, 0, -hlwd, -hlwd), units = "pt"),
-                  gp = gpar(lwd = NA, fill = ifelse(II.hi <= CI.hi, II.cols, II.colw)))
+                  gp = gpar(lwd = NA, fill = ifelse(!is.na(CI.hi) && II.hi <= CI.hi, II.cols, II.colw)))
     } else {
       polygonGrob(x = x2c(c(y, tII.hi, tII.hi, y), xlim),
                   y = unit(rep(0.5, 4), units = "npc") +
                     unit(c(hlwd, hlwd, -hlwd, -hlwd), units = "pt"),
-                  gp = gpar(lwd = NA, fill = ifelse(II.hi <= CI.hi, II.cols, II.colw)))
+                  gp = gpar(lwd = NA, fill = ifelse(!is.na(CI.hi) && II.hi <= CI.hi, II.cols, II.colw)))
     }},
 
     # CI
