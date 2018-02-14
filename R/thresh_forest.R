@@ -161,6 +161,7 @@ thresh_forest <- function(thresh,
   } else if (!is.list(orderby)) {
     orderby <- list(orderby)
   }
+  row_order <- do.call("order", orderby)
 
   # Set up additional columns
   if (!is.null(add.columns)) {
@@ -257,7 +258,7 @@ thresh_forest <- function(thresh,
   pd$lab.clinshort[pd$is.clinshort] <- "\206"
 
   # Reorder rows
-  pd <- pd[do.call("order", orderby), ]
+  pd <- pd[row_order, ]
 
   # Save the number of rows again, in case altered by orderby (e.g. with
   # na.last = NA.)
@@ -352,6 +353,9 @@ thresh_forest <- function(thresh,
 
   # Add in additional columns (if any)
   if (!is.null(add.columns)) {
+    # Reorder if necessary
+    add.columns <- add.columns[row_order, ]
+
     # Format numeric columns
     add.columns[] <- lapply(add.columns, function(x){if (is.numeric(x)) printsig(x) else x})
 
