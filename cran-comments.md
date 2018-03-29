@@ -1,5 +1,5 @@
 ## Test environments
-* local windows install, R 3.4.3
+* local windows install, R 3.4.4
 * win-builder (devel)
 
 ## R CMD check results
