@@ -208,6 +208,12 @@ recon_vcov <- function(post, prior.prec=.0001,
     message("Kullback-Leibler Divergence of fitted from 'true' posterior: ",
             KL.div)
 
+    # Return diagnostics as attributes
+    attr(lik.cov, "rss.total") <- sol$deviance
+    attr(lik.cov, "rss.fixed") <- rss0
+    attr(lik.cov, "rss.fitted") <- rss1
+    attr(lik.cov, "kl.divergence") <- KL.div
+
     return(lik.cov)
   }
 }
