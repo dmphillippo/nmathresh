@@ -1,5 +1,5 @@
 ## Test environments
-* local windows install, R 3.6.3 and 3.6.2
+* local windows install, R 4.0.1
 * win-builder (devel) 
 * r-hub check_for_cran (windows devel, ubuntu release, ubuntu devel)
 
