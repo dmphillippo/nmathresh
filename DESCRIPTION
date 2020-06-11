@@ -1,7 +1,7 @@
 Package: nmathresh
 Type: Package
 Title: Thresholds and Invariant Intervals for Network Meta-Analysis
-Version: 0.1.5.9000
+Version: 0.1.6
 Authors@R: person("David", "Phillippo", email="david.phillippo@bristol.ac.uk", role=c("aut","cre"))
 Description: Calculation and presentation of decision-invariant bias adjustment
     thresholds and intervals for Network Meta-Analysis, as described by 
